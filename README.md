@@ -1,4 +1,4 @@
-# MiniCRUD — Actividades Programación Avanzada
+# MiniCRUD — Practica1_Tema2
 
 Proyecto base para las actividades de modificación de atributos en MVC.
 
