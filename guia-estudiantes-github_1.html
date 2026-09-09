@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<!-- saved from url=(0063)file:///C:/Users/zaeli/Downloads/guia-estudiantes-github_1.html -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Cómo entregar la actividad MiniCRUD en GitHub</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -133,30 +133,17 @@ h1 span{color:var(--amber);}
 </div>
 
 <div class="progress-wrap">
-  <div class="progress-dots" id="progressDots"><div class="dot-step active">1</div><div class="dot-sep"></div><div class="dot-step">2</div><div class="dot-sep"></div><div class="dot-step">3</div><div class="dot-sep"></div><div class="dot-step">4</div><div class="dot-sep"></div><div class="dot-step">5</div><div class="dot-sep"></div><div class="dot-step">6</div><div class="dot-sep"></div><div class="dot-step">7</div></div>
-  <div class="progress-label" id="progressLabel">Paso <span>1</span> de <span>7</span> — Crear cuenta en GitHub</div>
+  <div class="progress-dots" id="progressDots"></div>
+  <div class="progress-label" id="progressLabel"></div>
 </div>
 
 <div class="step-area">
-  <div id="stepContainer">
-    <div class="step-panel">
-      <div class="card">
-        <div class="step-badge">
-          <div class="step-badge-num">01</div>
-          <div class="step-badge-title">Crear cuenta en GitHub</div>
-        </div>
-        
-      <p>Ingresar a <strong>github.com</strong> y hacer clic en <strong>Sign up</strong>. Completar con email, nombre de usuario y contraseña.</p>
-      <div class="tip"><div class="tip-lbl">Nombre de usuario</div>Conviene usar nombre y apellido o iniciales. Ese perfil funciona como portafolio profesional a largo plazo.</div>
-      <p>Si ya existe una cuenta, pasar directamente al paso siguiente.</p>
-    
-      </div>
-    </div></div>
+  <div id="stepContainer"></div>
 
   <div class="nav">
-    <button class="btn btn-prev" id="btnPrev" onclick="cambiarPaso(-1)" hidden="">← Anterior</button>
+    <button class="btn btn-prev" id="btnPrev" onclick="cambiarPaso(-1)">← Anterior</button>
     <button class="btn btn-next" id="btnNext" onclick="cambiarPaso(1)">Siguiente →</button>
-    <button class="btn btn-finish" id="btnFinish" onclick="mostrarFin()" hidden="">¡Listo! ✓</button>
+    <button class="btn btn-finish" id="btnFinish" onclick="mostrarFin()" hidden>¡Listo! ✓</button>
   </div>
 </div>
 
@@ -273,7 +260,7 @@ actividad 1</div>
       <p>Copiar la URL del fork con la rama de la actividad seleccionada. Se ve así:</p>
       <div class="term">
         <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span class="term-lbl">URL a entregar</span></div>
-        <div class="term-body"><span class="b">https://github.com/</span><span class="a">mi-usuario</span><span class="b">/JavaWebActividad1_Tema2/tree/</span><span class="a">actividad-1</span></div>
+        <div class="term-body"><span class="b">https://github.com/</span><span class="a">mi-usuario</span><span class="b">/MiniCRUD-Practica1_Tema2/tree/</span><span class="a">actividad-1</span></div>
       </div>
       <p>Ingresar a la tarea en Crea y pegar esa URL como respuesta o comentario de entrega.</p>
       <p><strong>No es necesario adjuntar ningún archivo ZIP.</strong> La docente accede directamente al fork para ver los cambios realizados.</p>
@@ -366,6 +353,5 @@ function reiniciar() {
 // Init
 renderPaso();
 </script>
-
-
-</body></html>
+</body>
+</html>
