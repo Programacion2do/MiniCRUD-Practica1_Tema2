@@ -164,8 +164,10 @@ const pasos = [
   {
     titulo: 'Hacer Fork del repositorio',
     html: `
-      <p>Ingresar al link del repositorio que comparte la docente. Con la sesión de GitHub iniciada, hacer clic en el botón <strong>Fork</strong> (arriba a la derecha) → <strong>Create fork</strong>.</p>
-      <p>GitHub crea una copia del repositorio en la cuenta personal. Es sobre esa copia donde se van a subir los cambios.</p>
+      <p>Ingresar al link del repositorio que comparte la docente. Con la sesión de GitHub iniciada, hacer clic en el botón <strong>Fork</strong> (arriba a la derecha).</p>
+      <p>GitHub lleva a una pantalla de confirmación antes de crear el fork. En esa pantalla hay que <strong>desmarcar</strong> la opción <strong>"Copy the main branch only"</strong> — de lo contrario el fork solo traerá la rama principal y no se verán las ramas de las actividades.</p>
+      <div class="alerta"><div class="alerta-lbl">⚠ Paso clave</div>La opción <strong>"Copy the main branch only"</strong> viene marcada por defecto. Desmarcarla antes de hacer clic en <strong>Create fork</strong>. Si el fork ya fue creado sin desmarcarla, eliminarlo y repetir el proceso.</div>
+      <p>Una vez creado el fork, verificar que en el selector de ramas aparezcan <strong>actividad-1</strong>, <strong>actividad-2</strong> y <strong>actividad-3</strong> además de main.</p>
       <div class="tip"><div class="tip-lbl">¿Qué es un fork?</div>Es una copia personal del proyecto. La docente puede ver exactamente qué líneas se cambiaron comparando el fork con el proyecto base — sin necesidad de recibir archivos ZIP.</div>
     `
   },
