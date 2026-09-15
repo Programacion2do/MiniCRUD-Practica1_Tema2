@@ -2,8 +2,7 @@ package modelo.vo;
 
 public class PersonaVO {
     private int cod;
-    private String nombre;
-
+    private double sueldo;
     public PersonaVO() {
 
     }
