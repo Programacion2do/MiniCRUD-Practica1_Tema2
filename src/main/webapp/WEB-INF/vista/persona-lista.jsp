@@ -17,7 +17,7 @@
             <tr>
               <th>Código</th>
               <th>Nombre</th>
-              <th>Nombre</th>
+              <th>Sueldo</th>
               <th>Acciones</th>
             </tr>
           </thead>
