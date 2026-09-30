@@ -1,0 +1,413 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guía de entrega — MiniCRUD</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#191a23;--panel:#22232f;--panel-2:#262838;--border:#34364a;
+  --text:#e7e7ee;--muted:#9497ab;
+  --amber:#f2a154;--amber-soft:rgba(242,161,84,.12);
+  --green:#7bd88f;--green-soft:rgba(123,216,143,.12);
+  --blue:#7aa2f7;--blue-soft:rgba(122,162,247,.12);
+  --red:#f7768e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
+
+.header{padding:36px 40px 28px;max-width:720px;margin:0 auto;width:100%;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+.eyebrow::before{content:'● ';}
+h1{font-family:'JetBrains Mono',monospace;font-size:clamp(18px,3.5vw,26px);font-weight:800;line-height:1.2;margin-bottom:8px;}
+h1 span{color:var(--amber);}
+.subtitle{color:var(--muted);font-size:13.5px;max-width:540px;line-height:1.6;}
+
+.progress-wrap{max-width:720px;margin:0 auto;padding:0 40px 20px;width:100%;}
+.progress-dots{display:flex;align-items:center;gap:6px;}
+.dot-step{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--muted);transition:all .25s;flex-shrink:0;}
+.dot-step.done{background:var(--amber-soft);border-color:rgba(242,161,84,.5);color:var(--amber);}
+.dot-step.active{background:var(--amber);border-color:var(--amber);color:#191a23;}
+.dot-sep{flex:1;height:2px;background:var(--border);border-radius:2px;min-width:6px;}
+.dot-sep.done{background:rgba(242,161,84,.4);}
+.progress-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;}
+.progress-label span{color:var(--amber);}
+
+.step-area{max-width:720px;margin:0 auto;padding:0 40px;width:100%;flex:1;}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:28px 28px 24px;}
+.card h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;margin-bottom:14px;}
+.card p{font-size:13.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;}
+.card p:last-child{margin-bottom:0;}
+.card p strong{color:var(--text);}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel-2);padding:1px 5px;border-radius:4px;color:var(--amber);}
+
+.step-badge{display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;}
+.step-badge-num{width:44px;height:44px;border-radius:50%;background:var(--amber-soft);border:1.5px solid rgba(242,161,84,.5);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--amber);}
+.step-badge-title{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;}
+.step-badge-title span{color:var(--amber);}
+
+.substeps{list-style:none;padding:0;margin:12px 0;}
+.substeps li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(52,54,74,.4);font-size:13.5px;color:var(--muted);line-height:1.65;}
+.substeps li:last-child{border-bottom:none;}
+.substeps li strong{color:var(--text);}
+.substep-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--amber-soft);border:1px solid rgba(242,161,84,.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--amber);margin-top:2px;}
+
+.file-list{margin:12px 0;display:flex;flex-direction:column;gap:6px;}
+.file-row{display:flex;align-items:baseline;gap:8px;padding:7px 12px;background:var(--panel-2);border-radius:6px;border:1px solid var(--border);}
+.file-badge{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.file-badge.crear{background:rgba(123,216,143,.15);color:var(--green);border:1px solid rgba(123,216,143,.3);}
+.file-badge.modificar{background:var(--amber-soft);color:var(--amber);border:1px solid rgba(242,161,84,.3);}
+.file-path{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);}
+.file-path span{color:var(--text);font-weight:600;}
+
+.term{background:#14151d;border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden;}
+.term-bar{background:var(--panel-2);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;gap:6px;align-items:center;}
+.tdot{width:10px;height:10px;border-radius:50%;background:var(--border);}
+.term-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:6px;}
+.term-body{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;color:var(--green);white-space:pre-wrap;}
+.term-body .c{color:var(--muted);}
+.term-body .a{color:var(--amber);}
+.term-body .b{color:var(--blue);}
+
+.tip{background:var(--green-soft);border:1px solid rgba(123,216,143,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.tip-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--green);letter-spacing:.06em;margin-bottom:5px;}
+.tip-lbl::before{content:'💡 ';}
+.alerta{background:var(--amber-soft);border:1px solid rgba(242,161,84,.35);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.alerta-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--amber);letter-spacing:.06em;margin-bottom:5px;}
+.alerta-lbl::before{content:'⚠ ';}
+
+.cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.cap-card{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:13px 15px;}
+.cap-icon{font-size:22px;margin-bottom:7px;}
+.cap-title{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--amber);margin-bottom:5px;}
+.cap-desc{font-size:12.5px;color:var(--muted);line-height:1.55;}
+
+.tabla{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+.tabla th{text-align:left;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);}
+.tabla td{padding:9px 12px;border-bottom:1px solid rgba(52,54,74,.5);color:var(--text);}
+.tabla td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--amber);}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding:20px 0 40px;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:11px 22px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;letter-spacing:.03em;}
+.btn-prev{background:var(--panel-2);border:1.5px solid var(--border);color:var(--muted);}
+.btn-prev:hover{border-color:var(--amber);color:var(--amber);}
+.btn-next{background:var(--amber);color:#191a23;}
+.btn-next:hover{background:#f5b374;transform:translateX(2px);}
+.btn-finish{background:var(--green);color:#191a23;}
+.btn-finish:hover{background:#9de8ab;}
+.btn[hidden]{display:none;}
+
+.complete-card{text-align:center;padding:40px 28px;}
+.complete-icon{font-size:52px;margin-bottom:20px;}
+.complete-card h2{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;margin-bottom:12px;}
+.complete-card h2 span{color:var(--green);}
+.complete-card p{color:var(--muted);font-size:14px;max-width:460px;margin:0 auto;}
+.btn-restart{margin-top:24px;background:var(--panel-2);border:1.5px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;padding:9px 18px;border-radius:8px;cursor:pointer;transition:all .2s;}
+.btn-restart:hover{border-color:var(--amber);color:var(--amber);}
+
+.step-panel{animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.footer{max-width:720px;margin:0 auto;padding:16px 40px 24px;border-top:1px solid var(--border);text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.7;width:100%;}
+
+@media(max-width:600px){
+  .header,.progress-wrap,.step-area{padding-left:20px;padding-right:20px;}
+  .cap-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow" id="eyebrowEl">Programación Avanzada · UTU · Bachillerato Tecnológico</div>
+  <h1 id="tituloEl"></h1>
+  <p class="subtitle">Leer cada paso, realizarlo y luego continuar al siguiente.</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-dots" id="progressDots"></div>
+  <div class="progress-label" id="progressLabel"></div>
+</div>
+
+<div class="step-area">
+  <div id="stepContainer"></div>
+  <div class="nav">
+    <button class="btn btn-prev" id="btnPrev" onclick="cambiarPaso(-1)">← Anterior</button>
+    <button class="btn btn-next" id="btnNext" onclick="cambiarPaso(1)">Siguiente →</button>
+    <button class="btn btn-finish" id="btnFinish" onclick="mostrarFin()" hidden>¡Listo! ✓</button>
+  </div>
+</div>
+
+<div class="footer" id="footerEl"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   CONFIGURACIÓN — cambiar estos valores para cada actividad
+   ══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  actividad: 'MiniCRUD — PersonaVO',
+
+  descripcionActividad: 'Agregar un campo nuevo a la entidad Persona: modificar PersonaVO, el Servlet y los dos JSP (formulario y lista).',
+
+  carpetaProyecto: 'mini-crud-alumno-sql',
+
+  urlBase: 'http://localhost:8080/mini-crud-alumno-sql',
+
+  urlPrueba: 'http://localhost:8080/mini-crud-alumno-sql/persona?accion=listar',
+
+  zipPrefijo: 'Actividad1',
+
+  zipEjemplo: 'Actividad1_GarciaMaria.zip',
+
+  archivos: [
+    { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/',     nombre: 'PersonaVO.java' },
+    { tipo: 'modificar', ruta: 'src/main/java/controlador/',   nombre: 'PersonaControladorServlet.java' },
+    { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-form.jsp' },
+    { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-lista.jsp' },
+  ],
+
+  verificacion: 'El campo nuevo debe aparecer tanto en el formulario de alta como en la tabla de la lista. Si solo aparece en uno de los dos, falta modificar el otro JSP.',
+
+  alertaDeploy: 'Los errores más comunes son: falta un getter en PersonaVO, el nombre del parámetro en el Servlet no coincide con el <code>name</code> del input en el JSP, o el constructor de PersonaVO no fue actualizado.',
+
+  capturas: [
+    { icono: '📋', titulo: 'Lista de personas',   desc: 'La tabla con al menos una persona cargada, mostrando el campo nuevo en la columna correspondiente. La URL debe ser visible.' },
+    { icono: '📝', titulo: 'Formulario de alta',  desc: 'El formulario con el campo nuevo visible y con datos escritos (antes de hacer clic en Guardar). La URL debe ser visible.' },
+  ],
+
+  archivosEntrega: [
+    { nombre: 'Actividad1_ApellidoNombre.zip', desc: 'El proyecto completo comprimido' },
+    { nombre: 'captura-lista.png',             desc: 'Lista con el campo nuevo visible' },
+    { nombre: 'captura-form.png',              desc: 'Formulario con el campo nuevo visible' },
+  ],
+
+  notaEntrega: 'Verificar que el ZIP tiene el nombre correcto con apellido y nombre, y que las capturas muestran el proyecto funcionando con la URL visible en la barra del navegador.',
+
+  recordatorioFormulario: '',
+};
+/* ══════════════════════════════════════════════════════════════
+   FIN DE CONFIGURACIÓN
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Helpers para generar HTML ── */
+function renderArchivos() {
+  return CONFIG.archivos.map(f =>
+    `<div class="file-row">
+       <span class="file-badge ${f.tipo}">${f.tipo}</span>
+       <span class="file-path">${f.ruta}<span>${f.nombre}</span></span>
+     </div>`
+  ).join('');
+}
+
+function renderCapturas() {
+  const cards = CONFIG.capturas.map(c =>
+    `<div class="cap-card">
+       <div class="cap-icon">${c.icono}</div>
+       <div class="cap-title">Captura — ${c.titulo}</div>
+       <div class="cap-desc">${c.desc}</div>
+     </div>`
+  ).join('');
+  return `<div class="cap-grid">${cards}</div>`;
+}
+
+function renderTablaEntrega() {
+  const filas = CONFIG.archivosEntrega.map((a, i) =>
+    `<tr><td>${i + 1}</td><td>${a.nombre}</td><td>${a.desc}</td></tr>`
+  ).join('');
+  return `<table class="tabla">
+    <thead><tr><th>#</th><th>Archivo</th><th>Descripción</th></tr></thead>
+    <tbody>${filas}</tbody>
+  </table>`;
+}
+
+/* ── Pasos ── */
+const pasos = [
+  {
+    titulo: 'Preparar los archivos del proyecto',
+    html: `
+      <p>${CONFIG.descripcionActividad}</p>
+      <p>Crear los siguientes archivos en las rutas indicadas dentro de la carpeta del proyecto:</p>
+      <div class="file-list">${renderArchivos()}</div>
+      <div class="tip"><div class="tip-lbl">Estructura del proyecto</div>La carpeta del proyecto es <strong>${CONFIG.carpetaProyecto}</strong> — la que contiene <strong>src/</strong> y <strong>pom.xml</strong>. Abrirla directamente con <strong>Archivo → Abrir carpeta</strong> en VS Code.</div>
+      <p>Completar el código de todos los archivos antes de pasar al siguiente paso.</p>
+    `
+  },
+  {
+    titulo: 'Desplegar y probar en Tomcat',
+    html: `
+      <p>Con los archivos guardados, compilar y ejecutar el proyecto desde la terminal integrada de VS Code.</p>
+      <ul class="substeps">
+        <li>
+          <div class="substep-num">a</div>
+          <div>Abrir la terminal en VS Code: <strong>Terminal → Nueva terminal</strong>. Ejecutar el primer comando:</div>
+        </li>
+      </ul>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span class="term-lbl">Terminal — paso 1: compilar</span></div>
+        <div class="term-body">mvn clean package</div>
+      </div>
+      <ul class="substeps">
+        <li>
+          <div class="substep-num">b</div>
+          <div>Cuando aparezca <strong>BUILD SUCCESS</strong>, ejecutar el segundo comando:</div>
+        </li>
+      </ul>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span class="term-lbl">Terminal — paso 2: iniciar Tomcat</span></div>
+        <div class="term-body">mvn cargo:run</div>
+      </div>
+      <ul class="substeps">
+        <li>
+          <div class="substep-num">c</div>
+          <div>Cuando aparezca el mensaje de Tomcat iniciado, abrir el navegador e ingresar a:</div>
+        </li>
+      </ul>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span class="term-lbl">URL del proyecto</span></div>
+        <div class="term-body"><span class="a">${CONFIG.urlPrueba}</span></div>
+      </div>
+      <div class="tip"><div class="tip-lbl">Verificación</div>${CONFIG.verificacion}</div>
+      <div class="alerta"><div class="alerta-lbl">Si hay error en el navegador</div>${CONFIG.alertaDeploy}</div>
+    `
+  },
+  {
+    titulo: 'Tomar las capturas de pantalla',
+    html: `
+      <p>Con el proyecto funcionando, tomar las siguientes capturas. La <strong>barra de direcciones del navegador</strong> debe quedar visible en todas las imágenes.</p>
+      ${renderCapturas()}
+      <div class="tip"><div class="tip-lbl">Cómo hacer una captura en Windows</div>Presionar <strong>Windows + Shift + S</strong> para seleccionar el área a capturar. La imagen se guarda en el portapapeles y también en <strong>Imágenes → Capturas de pantalla</strong>.</div>
+      <p>Guardar las imágenes con nombres claros, por ejemplo: <strong>captura-lista.png</strong>, <strong>captura-form.png</strong>, <strong>captura-editar.png</strong>.</p>
+    `
+  },
+  {
+    titulo: 'Comprimir el proyecto en ZIP',
+    html: `
+      <p>Abrir el Explorador de archivos, localizar la carpeta del proyecto y comprimirla.</p>
+      <ul class="substeps">
+        <li>
+          <div class="substep-num">a</div>
+          <div>Localizar la carpeta <strong>${CONFIG.carpetaProyecto}</strong> (la que contiene <strong>src/</strong> y <strong>pom.xml</strong>).</div>
+        </li>
+        <li>
+          <div class="substep-num">b</div>
+          <div>Hacer clic derecho → <strong>Comprimir en archivo ZIP</strong> (o "Enviar a → Carpeta comprimida").</div>
+        </li>
+        <li>
+          <div class="substep-num">c</div>
+          <div>Renombrar el ZIP con el formato <strong>${CONFIG.zipPrefijo}_ApellidoNombre.zip</strong>. Ejemplo: <strong>${CONFIG.zipEjemplo}</strong></div>
+        </li>
+      </ul>
+      <div class="alerta"><div class="alerta-lbl">Verificar antes de comprimir</div>Asegurarse de comprimir la carpeta del proyecto directamente — no una carpeta que la contenga.</div>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span class="term-lbl">Estructura correcta dentro del ZIP</span></div>
+        <div class="term-body"><span class="b">✓ Correcto:</span>
+<span class="a">${CONFIG.zipEjemplo}</span>
+  └── src/
+  └── pom.xml
+
+<span class="c">✗ Incorrecto (carpeta doble):</span>
+<span class="a">${CONFIG.zipEjemplo}</span>
+  └── ${CONFIG.carpetaProyecto}/
+        └── src/
+        └── pom.xml</div>
+      </div>
+    `
+  },
+  {
+    titulo: 'Entregar en CREA',
+    html: `
+      <p>Ingresar a la tarea correspondiente en CREA y adjuntar los siguientes archivos:</p>
+      ${renderTablaEntrega()}
+      ${CONFIG.notaEntrega ? `<div class="tip"><div class="tip-lbl">Antes de entregar</div>${CONFIG.notaEntrega}</div>` : ''}
+      ${CONFIG.recordatorioFormulario ? `<div class="alerta"><div class="alerta-lbl">Recordar</div>${CONFIG.recordatorioFormulario}</div>` : ''}
+    `
+  }
+];
+
+/* ── Motor de pasos ── */
+let pasoActual = 0;
+
+/* Inicializar encabezado y footer desde CONFIG */
+document.getElementById('tituloEl').innerHTML = `Entregar — <span>${CONFIG.actividad}</span>`;
+document.getElementById('footerEl').textContent =
+  `Programación Avanzada · Bachillerato Tecnológico · UTU (DGETP)  ·  Guía de entrega — ${CONFIG.actividad}`;
+
+function renderProgreso() {
+  const dots = document.getElementById('progressDots');
+  const label = document.getElementById('progressLabel');
+  dots.innerHTML = '';
+  pasos.forEach((_, i) => {
+    if (i > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'dot-sep' + (i <= pasoActual ? ' done' : '');
+      dots.appendChild(sep);
+    }
+    const d = document.createElement('div');
+    d.className = 'dot-step' + (i < pasoActual ? ' done' : i === pasoActual ? ' active' : '');
+    d.textContent = i + 1;
+    dots.appendChild(d);
+  });
+  label.innerHTML = `Paso <span>${pasoActual + 1}</span> de <span>${pasos.length}</span> — ${pasos[pasoActual].titulo}`;
+}
+
+function renderPaso() {
+  const container = document.getElementById('stepContainer');
+  const paso = pasos[pasoActual];
+  container.innerHTML = `
+    <div class="step-panel">
+      <div class="card">
+        <div class="step-badge">
+          <div class="step-badge-num">${String(pasoActual + 1).padStart(2,'0')}</div>
+          <div class="step-badge-title">${paso.titulo}</div>
+        </div>
+        ${paso.html}
+      </div>
+    </div>`;
+  document.getElementById('btnPrev').hidden = pasoActual === 0;
+  document.getElementById('btnNext').hidden = pasoActual === pasos.length - 1;
+  document.getElementById('btnFinish').hidden = pasoActual !== pasos.length - 1;
+  renderProgreso();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function cambiarPaso(dir) {
+  const siguiente = pasoActual + dir;
+  if (siguiente >= 0 && siguiente < pasos.length) {
+    pasoActual = siguiente;
+    renderPaso();
+  }
+}
+
+function mostrarFin() {
+  const container = document.getElementById('stepContainer');
+  container.innerHTML = `
+    <div class="step-panel">
+      <div class="card complete-card">
+        <div class="complete-icon">✅</div>
+        <h2>Entrega <span>completa</span></h2>
+        <p>El ZIP y las capturas fueron adjuntados en CREA. La docente puede revisar el proyecto y verificar que funciona correctamente.</p>
+        <button class="btn-restart" onclick="reiniciar()">↺ Ver la guía de nuevo</button>
+      </div>
+    </div>`;
+  document.getElementById('btnPrev').hidden = true;
+  document.getElementById('btnNext').hidden = true;
+  document.getElementById('btnFinish').hidden = true;
+  const dots = document.getElementById('progressDots');
+  dots.querySelectorAll('.dot-step').forEach(d => { d.classList.remove('active'); d.classList.add('done'); });
+  dots.querySelectorAll('.dot-sep').forEach(d => d.classList.add('done'));
+  document.getElementById('progressLabel').innerHTML = `<span>¡Todos los pasos completados!</span>`;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function reiniciar() { pasoActual = 0; renderPaso(); }
+
+renderPaso();
+</script>
+</body>
+</html>
+
+</body></html>
