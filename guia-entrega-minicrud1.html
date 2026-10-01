@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -163,8 +164,8 @@ const CONFIGS = [
     carpetaProyecto: 'minicrud0-mod1',
     urlBase:   'http://localhost:8080/minicrud0',
     urlPrueba: 'http://localhost:8080/minicrud0-mod1',
-    zipPrefijo: 'Actividad1',
-    zipEjemplo: 'Actividad1_GarciaMaria.zip',
+    zipPrefijo: 'Prac1-web-Actividad1',
+    zipEjemplo: 'Prac1-web-Actividad1_GarciaMaria.zip',
     archivos: [
       { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
       { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
@@ -176,7 +177,7 @@ const CONFIGS = [
       { icon: '🖥️', texto: '<strong>Lista de personas</strong> — tabla con columna Sueldo y al menos 2 personas cargadas con valores distintos.' },
       { icon: '📋', texto: '<strong>Formulario de alta</strong> — formulario con el campo Sueldo visible.' },
     ],
-    archivosEntrega: ['Actividad1_ApellidoNombre.zip', 'captura-lista.png', 'captura-form.png'],
+    archivosEntrega: ['Prac1-web-Actividad1_ApellidoNombre.zip', 'captura-lista.png', 'captura-form.png'],
   },
   {
     actividad: 'Actividad 02 — Agregar email',
@@ -186,8 +187,8 @@ const CONFIGS = [
     carpetaProyecto: 'minicrud0-mod2',
     urlBase:   'http://localhost:8080/minicrud0-mod1',
     urlPrueba: 'http://localhost:8080/minicrud0-mod2',
-    zipPrefijo: 'Actividad2',
-    zipEjemplo: 'Actividad2_GarciaMaria.zip',
+    zipPrefijo: 'Prac1-web-Actividad2',
+    zipEjemplo: 'Prac1-web-Actividad2_GarciaMaria.zip',
     archivos: [
       { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
       { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
@@ -199,7 +200,7 @@ const CONFIGS = [
       { icon: '🖥️', texto: '<strong>Lista de personas</strong> — tabla con columna Email y al menos 2 personas cargadas con emails distintos.' },
       { icon: '📋', texto: '<strong>Formulario de alta</strong> — formulario con el campo Email visible.' },
     ],
-    archivosEntrega: ['Actividad2_ApellidoNombre.zip', 'captura-lista.png', 'captura-form.png'],
+    archivosEntrega: ['Prac1-web-Actividad2_ApellidoNombre.zip', 'captura-lista.png', 'captura-form.png'],
   },
   {
     actividad: 'Actividad 03 — Categoría con select',
@@ -209,8 +210,8 @@ const CONFIGS = [
     carpetaProyecto: 'minicrud0-mod3',
     urlBase:   'http://localhost:8080/minicrud0-mod2',
     urlPrueba: 'http://localhost:8080/minicrud0-mod3',
-    zipPrefijo: 'Actividad3',
-    zipEjemplo: 'Actividad3_GarciaMaria.zip',
+    zipPrefijo: 'Prac1-web-Actividad3',
+    zipEjemplo: 'Prac1-web-Actividad3_GarciaMaria.zip',
     archivos: [
       { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
       { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
@@ -222,7 +223,7 @@ const CONFIGS = [
       { icon: '📋', texto: '<strong>Formulario de alta</strong> — mostrando el desplegable con las 3 opciones: Junior, Semi-Senior, Senior.' },
       { icon: '🖥️', texto: '<strong>Lista de personas</strong> — columna Categoría con personas de distintas categorías cargadas.' },
     ],
-    archivosEntrega: ['Actividad3_ApellidoNombre.zip', 'captura-form-select.png', 'captura-lista.png'],
+    archivosEntrega: ['Prac1-web-Actividad3_ApellidoNombre.zip', 'captura-form-select.png', 'captura-lista.png'],
   },
 ];
 
@@ -357,11 +358,6 @@ function buildPasos(cfg) {
         Este proyecto guarda los datos en memoria (<code>ArrayList</code>). Al reiniciar el servidor los datos se pierden —
         eso es normal. <strong>No hay que ejecutar ningún script SQL</strong>.
       </div>
-      <div class="alerta">
-        <div class="alerta-lbl">Verificar antes de modificar</div>
-        El proyecto original debe cargar sin errores. Si aparece una página en blanco o un error de compilación,
-        revisar el <code>pom.xml</code> (versión de Tomcat: <strong>10.1.57</strong>) antes de avanzar al paso siguiente.
-      </div>
     `
   };
 
@@ -381,7 +377,15 @@ function buildPasos(cfg) {
         </div>
       ` : ''}
 
-      <p style="margin-top:4px;">Realizar los cambios en los siguientes archivos:</p>
+      <div class="alerta">
+        <div class="alerta-lbl">Antes de modificar — renombrar el proyecto en el pom.xml</div>
+        Abrir el archivo <code>pom.xml</code> y cambiar el valor de <code>&lt;artifactId&gt;</code>
+        (y si existe, también <code>&lt;finalName&gt;</code>) de <code>${cfg.urlBase.split('/').pop()}</code>
+        a <code>${cfg.carpetaProyecto}</code>. Esto hace que la URL del servidor cambie a
+        <code>${cfg.urlPrueba}</code>.
+      </div>
+
+      <p style="margin-top:4px;">Luego realizar los cambios en los siguientes archivos:</p>
       <div class="file-list">${buildFilas(cfg.archivos)}</div>
 
       <p style="margin-top:16px;">Una vez guardados los cambios, volver a desplegar y verificar:</p>
@@ -434,7 +438,7 @@ function buildPasos(cfg) {
       <div class="capture-list">${buildCapturas(cfg.capturas)}</div>
       <div class="tip">
         <div class="tip-lbl">Consejo</div>
-        Usar <strong>Win + Shift + S</strong> (Windows) o <strong>Cmd + Shift + 4</strong> (Mac) para capturar
+        Usar <strong>Win + Shift + S</strong> para capturar
         solo la ventana del navegador. Guardar como .png con nombres descriptivos.
       </div>
     `
@@ -492,7 +496,7 @@ function buildPasos(cfg) {
       <div class="alerta">
         <div class="alerta-lbl">Nombre correcto del archivo</div>
         Revisar que el archivo se llame <code>${cfg.zipEjemplo}</code> con el apellido y nombre propios,
-        sin espacios ni acentos. Entregas con nombre incorrecto pueden no ser tenidas en cuenta.
+        sin espacios ni acentos.
       </div>
     `
   };
@@ -511,9 +515,18 @@ function render() {
   const btnPrev = document.getElementById('btn-prev');
   const btnNext = document.getElementById('btn-next');
   btnPrev.disabled = pasoIdx === 0;
-  const esUltimo = pasoIdx === pasos.length - 1;
-  btnNext.textContent = esUltimo ? '✓ Listo' : 'Siguiente →';
-  btnNext.disabled = esUltimo;
+  const esUltimoPaso = pasoIdx === pasos.length - 1;
+  const haySiguienteActividad = actIdx < CONFIGS.length - 1;
+  if (esUltimoPaso && haySiguienteActividad) {
+    btnNext.textContent = 'Ir a Actividad ' + (actIdx + 2) + ' →';
+    btnNext.disabled = false;
+  } else if (esUltimoPaso) {
+    btnNext.textContent = '✓ Listo';
+    btnNext.disabled = true;
+  } else {
+    btnNext.textContent = 'Siguiente →';
+    btnNext.disabled = false;
+  }
 }
 
 function cambiarActividad(idx) {
@@ -524,7 +537,13 @@ function cambiarActividad(idx) {
 
 function cambiarPaso(dir) {
   const pasos = buildPasos(CONFIGS[actIdx]);
-  pasoIdx = Math.max(0, Math.min(pasos.length - 1, pasoIdx + dir));
+  const nuevoIdx = pasoIdx + dir;
+  if (nuevoIdx >= pasos.length && actIdx < CONFIGS.length - 1) {
+    actIdx++;
+    pasoIdx = 0;
+  } else {
+    pasoIdx = Math.max(0, Math.min(pasos.length - 1, nuevoIdx));
+  }
   render();
 }
 
@@ -532,3 +551,5 @@ render();
 </script>
 </body>
 </html>
+
+</body></html>
