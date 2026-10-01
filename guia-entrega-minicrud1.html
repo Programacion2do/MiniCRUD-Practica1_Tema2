@@ -166,6 +166,7 @@ const CONFIGS = [
     urlPrueba: 'http://localhost:8080/minicrud0-mod1',
     zipPrefijo: 'Prac1-web-Actividad1',
     zipEjemplo: 'Prac1-web-Actividad1_GarciaMaria.zip',
+    formularioUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSehFeApzLpaAUn2CLS4txIg6Ly_gxelx7tn5swOnzroIR99yg/viewform',
     archivos: [
       { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
       { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
@@ -189,6 +190,7 @@ const CONFIGS = [
     urlPrueba: 'http://localhost:8080/minicrud0-mod2',
     zipPrefijo: 'Prac1-web-Actividad2',
     zipEjemplo: 'Prac1-web-Actividad2_GarciaMaria.zip',
+    formularioUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSc-Paa1DySHVFX9XZ9eGVXC3EU_yx0z185kHstAKI8osxKjQw/viewform',
     archivos: [
       { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
       { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
@@ -212,6 +214,7 @@ const CONFIGS = [
     urlPrueba: 'http://localhost:8080/minicrud0-mod3',
     zipPrefijo: 'Prac1-web-Actividad3',
     zipEjemplo: 'Prac1-web-Actividad3_GarciaMaria.zip',
+    formularioUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScj3YOAff8PqrhWfLUsTmkyxVbr8QbOWHSi-IIUFmUE_GTHzA/viewform',
     archivos: [
       { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
       { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
@@ -358,6 +361,19 @@ function buildPasos(cfg) {
         Este proyecto guarda los datos en memoria (<code>ArrayList</code>). Al reiniciar el servidor los datos se pierden —
         eso es normal. <strong>No hay que ejecutar ningún script SQL</strong>.
       </div>
+
+      ${cfg.formularioUrl ? `
+        <div class="alerta" style="margin-top:16px;">
+          <div class="alerta-lbl">📋 Responder antes de tocar el código</div>
+          Este práctico incluye preguntas orientadoras que deben completarse <strong>antes</strong> de realizar cualquier modificación.
+          Abrir el formulario, leer las preguntas y responderlas:
+          <br><br>
+          <a href="${cfg.formularioUrl}" target="_blank" rel="noopener"
+             style="display:inline-block;margin-top:4px;color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">
+            Ir al formulario →
+          </a>
+        </div>
+      ` : ''}
     `
   };
 
