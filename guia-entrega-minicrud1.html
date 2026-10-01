@@ -161,7 +161,8 @@ const CONFIGS = [
     nivelLabel: 'Referencia',
     tipo: 'act01',
     carpetaProyecto: 'minicrud0-mod1',
-    urlPrueba: 'http://localhost:8080/minicrud0-mod1/persona?accion=listar',
+    urlBase:   'http://localhost:8080/minicrud0',
+    urlPrueba: 'http://localhost:8080/minicrud0-mod1',
     zipPrefijo: 'Actividad1',
     zipEjemplo: 'Actividad1_GarciaMaria.zip',
     archivos: [
@@ -183,7 +184,8 @@ const CONFIGS = [
     nivelLabel: 'Individual',
     tipo: 'act02',
     carpetaProyecto: 'minicrud0-mod2',
-    urlPrueba: 'http://localhost:8080/minicrud0-mod2/persona?accion=listar',
+    urlBase:   'http://localhost:8080/minicrud0-mod1',
+    urlPrueba: 'http://localhost:8080/minicrud0-mod2',
     zipPrefijo: 'Actividad2',
     zipEjemplo: 'Actividad2_GarciaMaria.zip',
     archivos: [
@@ -205,7 +207,8 @@ const CONFIGS = [
     nivelLabel: 'Desafío',
     tipo: 'act03',
     carpetaProyecto: 'minicrud0-mod3',
-    urlPrueba: 'http://localhost:8080/minicrud0-mod3/persona?accion=listar',
+    urlBase:   'http://localhost:8080/minicrud0-mod2',
+    urlPrueba: 'http://localhost:8080/minicrud0-mod3',
     zipPrefijo: 'Actividad3',
     zipEjemplo: 'Actividad3_GarciaMaria.zip',
     archivos: [
@@ -285,33 +288,33 @@ function buildPasos(cfg) {
   const esAct03 = cfg.tipo === 'act03';
 
   const paso1 = {
-    titulo: 'Preparar el proyecto',
+    titulo: 'Configurar el proyecto',
     html: `
       <div class="step-badge">
         <div class="step-badge-num">1</div>
-        <div class="step-badge-title">Preparar el <span>proyecto</span></div>
+        <div class="step-badge-title">Configurar el <span>proyecto</span></div>
       </div>
 
       ${esAct01 ? `
         <div class="alerta">
-          <div class="alerta-lbl">Proyecto base — descargar minicrud0</div>
-          Descargar el proyecto <strong>minicrud0</strong> e importarlo en el IDE antes de empezar:
-          <a href="[URL_MINICRUD0]" target="_blank" rel="noopener"
-             style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">[URL del proyecto minicrud0]</a>.
-          Este proyecto usa un <code>ArrayList</code> en memoria — <strong>no hay base de datos ni scripts SQL</strong>.
-        </div>
-        <div class="tip">
-          <div class="tip-lbl">Referencia resuelta</div>
-          Esta actividad tiene la solución completa en el documento de consigna. Estudiar el código antes de copiarlo:
-          el objetivo es entender qué cambia en cada capa y por qué.
+          <div class="alerta-lbl">Proyecto base — descargar mini-crud0</div>
+          Descargar el ZIP, descomprimir y abrir la carpeta <code>mini-crud0</code> en VS Code
+          con <em>Archivo → Abrir carpeta…</em> (seleccionar la carpeta, no el ZIP):
+          <br><br>
+          <a href="https://github.com/eliizquierdo/material_programacion_avanzada2026/blob/main/proyectos-teoricos/mini-crud0/mini-crud0.zip"
+             target="_blank" rel="noopener"
+             style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">
+            mini-crud0.zip →
+          </a>
         </div>
       ` : ''}
 
       ${esAct02 ? `
         <div class="tip">
           <div class="tip-lbl">Continuar sobre la Actividad 01</div>
-          Abrir el proyecto <strong>minicrud0-mod1</strong> que quedó de la Actividad 01 — el que ya tiene el atributo
-          <code>sueldo</code> funcionando. No descargar nada nuevo.
+          Abrir la carpeta <strong>minicrud0-mod1</strong> en VS Code —
+          el proyecto que quedó de la Actividad 01 con el atributo <code>sueldo</code> funcionando.
+          No descargar nada nuevo.
         </div>
       ` : ''}
 
@@ -324,24 +327,19 @@ function buildPasos(cfg) {
         </div>
         <div class="tip">
           <div class="tip-lbl">Continuar sobre la Actividad 02</div>
-          Abrir el proyecto <strong>minicrud0-mod2</strong> que quedó de la Actividad 02 — el que tiene
-          <code>sueldo</code> y <code>email</code>. No descargar nada nuevo.
+          Abrir la carpeta <strong>minicrud0-mod2</strong> en VS Code —
+          el proyecto que quedó de la Actividad 02 con <code>sueldo</code> y <code>email</code>.
+          No descargar nada nuevo.
         </div>
       ` : ''}
 
-      <p style="margin-top:12px;font-size:13px;color:var(--muted);">Archivos a modificar en este proyecto:</p>
-      <div class="file-list">${buildFilas(cfg.archivos)}</div>
-    `
-  };
-
-  const paso2 = {
-    titulo: 'Desplegar y verificar',
-    html: `
-      <div class="step-badge">
-        <div class="step-badge-num">2</div>
-        <div class="step-badge-title">Desplegar y <span>verificar</span></div>
+      <div class="tip">
+        <div class="tip-lbl">Revisar versión de Tomcat en el pom.xml</div>
+        Antes de desplegar, abrir el archivo <code>pom.xml</code> y verificar que la versión de Tomcat
+        sea <strong>10.1.57</strong>. Si aparece otra versión, corregirla antes de continuar.
       </div>
-      <p>Con los cambios guardados, compilar y desplegar con Maven:</p>
+
+      <p style="margin-top:4px;">Desplegar el proyecto <strong>sin modificar nada</strong> para comprobar que funciona de base:</p>
       <div class="term">
         <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
           <span class="term-lbl">Terminal — dentro de la carpeta del proyecto</span></div>
@@ -352,12 +350,51 @@ function buildPasos(cfg) {
       <div class="term">
         <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
           <span class="term-lbl">Navegador</span></div>
-        <div class="term-body"><span class="b">${cfg.urlPrueba}</span></div>
+        <div class="term-body"><span class="b">${cfg.urlBase}</span></div>
       </div>
       <div class="tip">
         <div class="tip-lbl">Sin base de datos</div>
         Este proyecto guarda los datos en memoria (<code>ArrayList</code>). Al reiniciar el servidor los datos se pierden —
         eso es normal. <strong>No hay que ejecutar ningún script SQL</strong>.
+      </div>
+      <div class="alerta">
+        <div class="alerta-lbl">Verificar antes de modificar</div>
+        El proyecto original debe cargar sin errores. Si aparece una página en blanco o un error de compilación,
+        revisar el <code>pom.xml</code> (versión de Tomcat: <strong>10.1.57</strong>) antes de avanzar al paso siguiente.
+      </div>
+    `
+  };
+
+  const paso2 = {
+    titulo: 'Modificar el código',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">2</div>
+        <div class="step-badge-title">Modificar el <span>código</span></div>
+      </div>
+
+      ${esAct01 ? `
+        <div class="tip">
+          <div class="tip-lbl">Referencia resuelta</div>
+          Esta actividad tiene la solución completa en el documento de consigna. Estudiar el código antes de copiarlo:
+          el objetivo es entender qué cambia en cada capa y por qué.
+        </div>
+      ` : ''}
+
+      <p style="margin-top:4px;">Realizar los cambios en los siguientes archivos:</p>
+      <div class="file-list">${buildFilas(cfg.archivos)}</div>
+
+      <p style="margin-top:16px;">Una vez guardados los cambios, volver a desplegar y verificar:</p>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Terminal — dentro de la carpeta del proyecto</span></div>
+        <div class="term-body"><span class="a">mvn</span> clean package
+<span class="a">mvn</span> cargo:run</div>
+      </div>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Navegador</span></div>
+        <div class="term-body"><span class="b">${cfg.urlPrueba}</span></div>
       </div>
       ${esAct01 ? `
         <div class="alerta">
