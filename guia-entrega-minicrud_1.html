@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guía de entrega — Modificar el MiniCRUD</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#191a23;--panel:#22232f;--panel-2:#262838;--border:#34364a;
+  --text:#e7e7ee;--muted:#9497ab;
+  --amber:#f2a154;--amber-soft:rgba(242,161,84,.12);
+  --green:#7bd88f;--green-soft:rgba(123,216,143,.12);
+  --blue:#7aa2f7;--blue-soft:rgba(122,162,247,.12);
+  --red:#f7768e;--red-soft:rgba(247,118,142,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
+
+.header{padding:36px 40px 20px;max-width:720px;margin:0 auto;width:100%;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+.eyebrow::before{content:'● ';}
+h1{font-family:'JetBrains Mono',monospace;font-size:clamp(18px,3.5vw,26px);font-weight:800;line-height:1.2;margin-bottom:8px;}
+h1 span{color:var(--amber);}
+.subtitle{color:var(--muted);font-size:13.5px;max-width:540px;line-height:1.6;}
+
+/* ── Pestañas de actividad ── */
+.tabs-wrap{max-width:720px;margin:0 auto;padding:0 40px 24px;width:100%;}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.tab-btn{
+  display:flex;align-items:center;gap:8px;
+  background:var(--panel-2);border:1.5px solid var(--border);
+  border-radius:10px;padding:10px 14px;cursor:pointer;
+  font-family:'Inter',sans-serif;text-align:left;
+  transition:all .2s;min-width:0;width:100%;
+}
+.tab-btn:hover{border-color:rgba(242,161,84,.4);}
+.tab-btn.active{border-color:var(--amber);background:var(--amber-soft);}
+.tab-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--muted);background:var(--panel);border:1px solid var(--border);
+  border-radius:6px;padding:2px 7px;flex-shrink:0;transition:all .2s;}
+.tab-btn.active .tab-num{color:var(--amber);border-color:rgba(242,161,84,.4);background:var(--amber-soft);}
+.tab-info{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.tab-title{font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.3;transition:color .2s;}
+.tab-btn.active .tab-title{color:var(--text);}
+.tab-level{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:4px;align-self:flex-start;}
+.tab-level.referencia{background:var(--green-soft);color:var(--green);border:1px solid rgba(123,216,143,.3);}
+.tab-level.individual{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(122,162,247,.3);}
+.tab-level.desafio{background:var(--red-soft);color:var(--red);border:1px solid rgba(247,118,142,.3);}
+
+.progress-wrap{max-width:720px;margin:0 auto;padding:0 40px 20px;width:100%;}
+.progress-dots{display:flex;align-items:center;gap:6px;}
+.dot-step{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--muted);transition:all .25s;flex-shrink:0;}
+.dot-step.done{background:var(--amber-soft);border-color:rgba(242,161,84,.5);color:var(--amber);}
+.dot-step.active{background:var(--amber);border-color:var(--amber);color:#191a23;}
+.dot-sep{flex:1;height:2px;background:var(--border);border-radius:2px;min-width:6px;}
+.dot-sep.done{background:rgba(242,161,84,.4);}
+.progress-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;}
+.progress-label span{color:var(--amber);}
+
+.step-area{max-width:720px;margin:0 auto;padding:0 40px;width:100%;flex:1;}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:28px 28px 24px;}
+.card h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;margin-bottom:14px;}
+.card p{font-size:13.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;}
+.card p:last-child{margin-bottom:0;}
+.card p strong{color:var(--text);}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel-2);padding:1px 5px;border-radius:4px;color:var(--amber);}
+
+.step-badge{display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;}
+.step-badge-num{width:44px;height:44px;border-radius:50%;background:var(--amber-soft);border:1.5px solid rgba(242,161,84,.5);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--amber);}
+.step-badge-title{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;}
+.step-badge-title span{color:var(--amber);}
+
+.substeps{list-style:none;padding:0;margin:12px 0;}
+.substeps li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(52,54,74,.4);font-size:13.5px;color:var(--muted);line-height:1.65;}
+.substeps li:last-child{border-bottom:none;}
+.substeps li strong{color:var(--text);}
+.substep-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--amber-soft);border:1px solid rgba(242,161,84,.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--amber);margin-top:2px;}
+
+.file-list{margin:12px 0;display:flex;flex-direction:column;gap:6px;}
+.file-row{display:flex;align-items:baseline;gap:8px;padding:7px 12px;background:var(--panel-2);border-radius:6px;border:1px solid var(--border);}
+.file-badge{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.file-badge.modificar{background:var(--amber-soft);color:var(--amber);border:1px solid rgba(242,161,84,.3);}
+.file-badge.sin-cambios{background:var(--panel-2);color:var(--muted);border:1px solid var(--border);}
+.file-path{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);}
+.file-path span{color:var(--text);font-weight:600;}
+
+.term{background:#14151d;border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden;}
+.term-bar{background:var(--panel-2);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;gap:6px;align-items:center;}
+.tdot{width:10px;height:10px;border-radius:50%;background:var(--border);}
+.term-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:6px;}
+.term-body{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;color:var(--green);white-space:pre-wrap;}
+.term-body .c{color:var(--muted);}
+.term-body .a{color:var(--amber);}
+.term-body .b{color:var(--blue);}
+
+.tip{background:var(--green-soft);border:1px solid rgba(123,216,143,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.tip-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--green);letter-spacing:.06em;margin-bottom:5px;}
+.alerta{background:var(--amber-soft);border:1px solid rgba(242,161,84,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.alerta-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--amber);letter-spacing:.06em;margin-bottom:5px;}
+.aviso{background:var(--red-soft);border:1px solid rgba(247,118,142,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.aviso-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--red);letter-spacing:.06em;margin-bottom:5px;}
+
+.capture-list{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.capture-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--panel-2);border-radius:8px;border:1px solid var(--border);}
+.capture-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
+.capture-text{font-size:13px;color:var(--muted);line-height:1.5;}
+.capture-text strong{color:var(--text);}
+
+.entrega-list{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+.entrega-item{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--panel-2);border-radius:7px;border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+.entrega-icon{color:var(--amber);flex-shrink:0;}
+
+.nav{display:flex;justify-content:space-between;align-items:center;padding:24px 40px 40px;max-width:720px;margin:0 auto;width:100%;}
+.nav-btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:10px 22px;border-radius:8px;cursor:pointer;border:1.5px solid var(--border);background:var(--panel-2);color:var(--text);transition:all .2s;}
+.nav-btn:hover:not(:disabled){border-color:var(--amber);color:var(--amber);}
+.nav-btn:disabled{opacity:.3;cursor:default;}
+.nav-btn.primary{background:var(--amber);color:#191a23;border-color:var(--amber);}
+.nav-btn.primary:hover:not(:disabled){background:#e8924a;}
+
+@media(max-width:520px){
+  .header,.tabs-wrap,.progress-wrap,.step-area,.nav{padding-left:20px;padding-right:20px;}
+  .tabs{flex-direction:column;}
+  .tab-btn{width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Programación Avanzada · UTU</div>
+  <h1>Guía de entrega — <span>Modificar el MiniCRUD</span></h1>
+  <p class="subtitle">Tres actividades para extender el proyecto base agregando, cambiando y reorganizando atributos a través de todas las capas MVC.</p>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-dots" id="dots"></div>
+  <div class="progress-label" id="progress-label"></div>
+</div>
+
+<div class="step-area">
+  <div class="card" id="card"></div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="btn-prev" onclick="cambiarPaso(-1)">← Anterior</button>
+  <button class="nav-btn primary" id="btn-next" onclick="cambiarPaso(1)">Siguiente →</button>
+</div>
+
+<script>
+const CONFIGS = [
+  {
+    actividad: 'Actividad 01 — Agregar sueldo',
+    objetivo: 'El proyecto base (<code>minicrud0</code>) solo guarda <strong>código</strong> y <strong>nombre</strong> de cada persona. La tarea es agregar el atributo <strong>sueldo</strong> (número decimal) y hacer que aparezca en el formulario de alta y en la tabla de listado.',
+    personaVOCambio: 'cod, nombre → cod, nombre, <strong style="color:var(--amber)">sueldo</strong>',
+    preguntasOrientadoras: [
+      '¿En qué clase Java se define la estructura de datos de una Persona? ¿Cómo se llama el patrón de diseño que usan las clases que terminan en <code>VO</code>?',
+      '¿Qué tipo de dato Java se usaría para representar un sueldo con decimales? ¿Por qué no se usaría <code>int</code>?',
+      '¿Para qué sirve el <em>getter</em> de un atributo? ¿Qué relación tiene con la expresión <code>${p.sueldo}</code> que se va a escribir en el JSP?',
+      '¿Qué archivo Java recibe los datos que el usuario envía desde el formulario? ¿Por qué es necesario usar <code>Double.parseDouble()</code> para el sueldo pero no para el nombre?',
+      '¿Cuántos archivos JSP hay que modificar? ¿Cuál es la diferencia entre el formulario y la lista?',
+      '¿Por qué <strong>no</strong> es necesario modificar <code>PersonaDAO.java</code>?',
+    ],
+    archivosDetalle: [
+      { nombre: 'PersonaVO.java', capa: 'Modelo · VO', descripcion: 'Agregar atributo, constructor, getter/setter, toString', tipo: 'modificar' },
+      { nombre: 'PersonaControladorServlet.java', capa: 'Controlador', descripcion: 'Leer parámetro <code>sueldo</code> del request y pasarlo al constructor', tipo: 'modificar' },
+      { nombre: 'persona-form.jsp', capa: 'Vista · Formulario', descripcion: 'Agregar campo <code>&lt;input&gt;</code> para sueldo', tipo: 'modificar' },
+      { nombre: 'persona-lista.jsp', capa: 'Vista · Listado', descripcion: 'Agregar columna Sueldo en header y en filas', tipo: 'modificar' },
+      { nombre: 'PersonaDAO.java', capa: 'Modelo · DAO', descripcion: 'Sin cambios — la lógica de la lista no depende de los atributos', tipo: 'sin-cambios' },
+    ],
+    // ---
+    nivelCss: 'referencia',
+    nivelLabel: 'Referencia',
+    tipo: 'act01',
+    carpetaProyecto: 'minicrud0-mod1',
+    urlBase:   'http://localhost:8080/minicrud0',
+    urlPrueba: 'http://localhost:8080/minicrud0-mod1',
+    zipPrefijo: 'Prac1-web-Actividad1',
+    zipEjemplo: 'Prac1-web-Actividad1_GarciaMaria.zip',
+    formularioUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSehFeApzLpaAUn2CLS4txIg6Ly_gxelx7tn5swOnzroIR99yg/viewform',
+    archivos: [
+      { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
+      { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-form.jsp' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-lista.jsp' },
+      { tipo: 'sin-cambios', ruta: 'src/main/java/modelo/dao/', nombre: 'PersonaDAO.java' },
+    ],
+    capturas: [
+      { icon: '🖥️', texto: '<strong>Lista de personas</strong> — tabla con columna Sueldo y al menos 2 personas cargadas con valores distintos.' },
+      { icon: '📋', texto: '<strong>Formulario de alta</strong> — formulario con el campo Sueldo visible.' },
+    ],
+    archivosEntrega: ['Prac1-web-Actividad1_ApellidoNombre.zip'],
+  },
+  {
+    actividad: 'Actividad 02 — Agregar email',
+    objetivo: 'Partiendo del proyecto con <code>sueldo</code> ya funcionando, agregar el atributo <strong>email</strong> (texto libre) de cada persona. Debe aparecer en el formulario de alta y en la tabla de listado.',
+    personaVOCambio: 'cod, nombre, sueldo → cod, nombre, sueldo, <strong style="color:var(--amber)">email</strong>',
+    preguntasOrientadoras: [
+      '¿Qué tipo de dato Java se usaría para almacenar un email? ¿Es necesario convertirlo con algún método como <code>Integer.parseInt()</code> o <code>Double.parseDouble()</code>? ¿Por qué?',
+      'Comparando con la actividad anterior: ¿en qué se diferencia agregar un atributo <code>String</code> de agregar un <code>double</code>? ¿Qué pasos son exactamente iguales y cuál cambia?',
+      'El HTML tiene un <code>type="email"</code> para inputs de correo electrónico. ¿Qué ventaja tiene usarlo en lugar de <code>type="text"</code>? ¿Cambia algo en el servidor?',
+      'Listar los 4 archivos a modificar y describir en una línea qué va a cambiar en cada uno, <em>antes de abrir el editor</em>.',
+      'Si se agrega el campo en el formulario pero se olvida actualizar el constructor de <code>PersonaVO</code>, ¿el proyecto compila? ¿Qué error se vería?',
+    ],
+    archivosDetalle: [
+      { nombre: 'PersonaVO.java', capa: 'Modelo · VO', descripcion: 'Declarar <code>private String email</code>, actualizar constructor, agregar getter y setter, actualizar <code>toString()</code>', tipo: 'modificar' },
+      { nombre: 'PersonaControladorServlet.java', capa: 'Controlador', descripcion: 'En el método <code>agregar()</code>: leer <code>request.getParameter("email")</code> y pasarlo al constructor', tipo: 'modificar' },
+      { nombre: 'persona-form.jsp', capa: 'Vista · Formulario', descripcion: 'Agregar <code>&lt;label&gt;</code> e <code>&lt;input type="email"&gt;</code> con <code>name="email"</code>', tipo: 'modificar' },
+      { nombre: 'persona-lista.jsp', capa: 'Vista · Listado', descripcion: 'Agregar <code>&lt;th&gt;Email&lt;/th&gt;</code> en el header y <code>&lt;td&gt;${p.email}&lt;/td&gt;</code> en cada fila', tipo: 'modificar' },
+      { nombre: 'PersonaDAO.java', capa: 'Modelo · DAO', descripcion: 'Sin cambios', tipo: 'sin-cambios' },
+    ],
+    // ---
+    nivelCss: 'individual',
+    nivelLabel: 'Individual',
+    tipo: 'act02',
+    carpetaProyecto: 'minicrud0-mod2',
+    urlBase:   'http://localhost:8080/minicrud0-mod1',
+    urlPrueba: 'http://localhost:8080/minicrud0-mod2',
+    zipPrefijo: 'Prac1-web-Actividad2',
+    zipEjemplo: 'Prac1-web-Actividad2_GarciaMaria.zip',
+    formularioUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSc-Paa1DySHVFX9XZ9eGVXC3EU_yx0z185kHstAKI8osxKjQw/viewform',
+    archivos: [
+      { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
+      { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-form.jsp' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-lista.jsp' },
+      { tipo: 'sin-cambios', ruta: 'src/main/java/modelo/dao/', nombre: 'PersonaDAO.java' },
+    ],
+    capturas: [
+      { icon: '🖥️', texto: '<strong>Lista de personas</strong> — tabla con columna Email y al menos 2 personas cargadas con emails distintos.' },
+      { icon: '📋', texto: '<strong>Formulario de alta</strong> — formulario con el campo Email visible.' },
+    ],
+    archivosEntrega: ['Prac1-web-Actividad2_ApellidoNombre.zip'],
+  },
+  {
+    actividad: 'Actividad 03 — Categoría con select',
+    objetivo: 'Esta actividad es diferente: no solo se agrega un atributo nuevo, sino que se <strong>reemplaza</strong> uno existente. El atributo <code>sueldo</code> (double, valor libre) se elimina y en su lugar aparece <code>categoria</code> (String con tres opciones fijas: "Junior", "Semi-Senior" y "Senior"). En el formulario, el usuario elige de una lista desplegable.',
+    personaVOCambio: '<s style="color:var(--muted)">sueldo (double)</s> → <strong style="color:var(--amber)">categoria (String)</strong>',
+    preguntasOrientadoras: [
+      '¿Qué diferencia hay entre <em>agregar</em> un atributo y <em>reemplazarlo</em>? ¿Cuántos pasos adicionales implica quitar algo?',
+      '¿Qué tipo de dato Java se usaría para <code>categoria</code> si las opciones son "Junior", "Semi-Senior" y "Senior"? ¿Podría ser un <code>int</code>? ¿Cuáles serían las ventajas y desventajas de usar un <code>enum</code>?',
+      'El elemento HTML <code>&lt;select&gt;</code> tiene varias etiquetas <code>&lt;option&gt;</code> adentro. ¿Cómo llega el valor seleccionado al Servlet? ¿Con qué método se lee?',
+      'Cuando el usuario elige una opción de un <code>&lt;select&gt;</code>, ¿el valor que llega es el texto del <code>&lt;option&gt;</code> o el atributo <code>value</code>? ¿Qué pasa si no se pone el atributo <code>value</code>?',
+      '¿Es necesario modificar <code>PersonaDAO.java</code> para este cambio? Justificar la respuesta.',
+      '¿Qué ventaja tiene ofrecer opciones fijas (un select) frente a dejar que el usuario escriba la categoría libremente?',
+    ],
+    archivosDetalle: [
+      { nombre: 'PersonaVO.java', capa: 'Modelo · VO', descripcion: 'Quitar <code>double sueldo</code> → agregar <code>String categoria</code>. Actualizar constructor, getters/setters y toString.', tipo: 'modificar' },
+      { nombre: 'PersonaControladorServlet.java', capa: 'Controlador', descripcion: 'Quitar lectura de <code>sueldo</code>. Leer <code>categoria</code> con <code>getParameter()</code> sin conversión.', tipo: 'modificar' },
+      { nombre: 'persona-form.jsp', capa: 'Vista · Formulario', descripcion: 'Reemplazar el <code>&lt;input type="number"&gt;</code> por un <code>&lt;select&gt;</code> con 3 opciones.', tipo: 'modificar' },
+      { nombre: 'persona-lista.jsp', capa: 'Vista · Listado', descripcion: 'Cambiar la columna "Sueldo" por "Categoría" y la celda <code>${p.sueldo}</code> por <code>${p.categoria}</code>.', tipo: 'modificar' },
+      { nombre: 'PersonaDAO.java', capa: 'Modelo · DAO', descripcion: 'Sin cambios', tipo: 'sin-cambios' },
+    ],
+    // ---
+    nivelCss: 'desafio',
+    nivelLabel: 'Desafío',
+    tipo: 'act03',
+    carpetaProyecto: 'minicrud0-mod3',
+    urlBase:   'http://localhost:8080/minicrud0-mod2',
+    urlPrueba: 'http://localhost:8080/minicrud0-mod3',
+    zipPrefijo: 'Prac1-web-Actividad3',
+    zipEjemplo: 'Prac1-web-Actividad3_GarciaMaria.zip',
+    formularioUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScj3YOAff8PqrhWfLUsTmkyxVbr8QbOWHSi-IIUFmUE_GTHzA/viewform',
+    archivos: [
+      { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/', nombre: 'PersonaVO.java' },
+      { tipo: 'modificar', ruta: 'src/main/java/controlador/', nombre: 'PersonaControladorServlet.java' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-form.jsp' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-lista.jsp' },
+      { tipo: 'sin-cambios', ruta: 'src/main/java/modelo/dao/', nombre: 'PersonaDAO.java' },
+    ],
+    capturas: [
+      { icon: '📋', texto: '<strong>Formulario de alta</strong> — mostrando el desplegable con las 3 opciones: Junior, Semi-Senior, Senior.' },
+      { icon: '🖥️', texto: '<strong>Lista de personas</strong> — columna Categoría con personas de distintas categorías cargadas.' },
+    ],
+    archivosEntrega: ['Prac1-web-Actividad3_ApellidoNombre.zip'],
+  },
+];
+
+let actIdx = 0;
+let pasoIdx = 0;
+
+function buildTabs() {
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = CONFIGS.map((cfg, i) => `
+    <button class="tab-btn${i === actIdx ? ' active' : ''}" onclick="cambiarActividad(${i})">
+      <span class="tab-num">0${i+1}</span>
+      <span class="tab-info">
+        <span class="tab-title">${cfg.actividad}</span>
+        <span class="tab-level ${cfg.nivelCss}">${cfg.nivelLabel}</span>
+      </span>
+    </button>
+  `).join('');
+}
+
+function buildDots(pasos) {
+  const wrap = document.getElementById('dots');
+  wrap.innerHTML = pasos.map((p, i) => {
+    const cls = i < pasoIdx ? 'done' : i === pasoIdx ? 'active' : '';
+    const sep = i < pasos.length - 1
+      ? `<div class="dot-sep${i < pasoIdx ? ' done' : ''}"></div>`
+      : '';
+    return `<div class="dot-step ${cls}">${i+1}</div>${sep}`;
+  }).join('');
+
+  document.getElementById('progress-label').innerHTML =
+    `Paso <span>${pasoIdx + 1} de ${pasos.length}</span> — ${pasos[pasoIdx].titulo}`;
+}
+
+function buildFilas(archivos) {
+  return archivos.map(f => `
+    <div class="file-row">
+      <span class="file-badge ${f.tipo}">${f.tipo === 'sin-cambios' ? 'sin cambios' : f.tipo}</span>
+      <span class="file-path">${f.ruta}<span>${f.nombre}</span></span>
+    </div>
+  `).join('');
+}
+
+function buildCapturas(capturas) {
+  return capturas.map(c => `
+    <div class="capture-item">
+      <span class="capture-icon">${c.icon}</span>
+      <span class="capture-text">${c.texto}</span>
+    </div>
+  `).join('');
+}
+
+function buildArchivosDetalle(arr) {
+  return `
+    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;">
+      <thead>
+        <tr style="border-bottom:1.5px solid var(--border);">
+          <th style="text-align:left;padding:6px 8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Archivo</th>
+          <th style="text-align:left;padding:6px 8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Capa</th>
+          <th style="text-align:left;padding:6px 8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;">¿Qué hay que hacer?</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${arr.map(f => `
+          <tr style="border-bottom:1px solid rgba(52,54,74,.4);">
+            <td style="padding:7px 8px;white-space:nowrap;vertical-align:top;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);font-weight:600;">${f.nombre}</span>
+            </td>
+            <td style="padding:7px 8px;white-space:nowrap;vertical-align:top;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);">${f.capa}</span>
+            </td>
+            <td style="padding:7px 8px;vertical-align:top;">
+              <span class="file-badge ${f.tipo}" style="margin-right:6px;vertical-align:middle;">${f.tipo === 'sin-cambios' ? 'sin cambios' : f.tipo}</span><span style="color:var(--muted);line-height:1.5;">${f.descripcion}</span>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function buildEntrega(archivos) {
+  return archivos.map(a => `
+    <div class="entrega-item">
+      <span class="entrega-icon">📎</span>${a}
+    </div>
+  `).join('');
+}
+
+function buildPasos(cfg) {
+  const esAct01 = cfg.tipo === 'act01';
+  const esAct02 = cfg.tipo === 'act02';
+  const esAct03 = cfg.tipo === 'act03';
+
+  const paso0 = {
+    titulo: 'Leer la consigna',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num" style="font-size:18px;">📖</div>
+        <div class="step-badge-title">Leer la <span>consigna</span></div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-lbl">Objetivo</div>
+        <p style="margin-bottom:10px;">${cfg.objetivo}</p>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:var(--panel-2);padding:7px 12px;border-radius:6px;display:inline-block;margin:0;">${cfg.personaVOCambio}</p>
+      </div>
+
+      <p style="margin-top:16px;margin-bottom:4px;font-size:13px;">Archivos involucrados:</p>
+      ${buildArchivosDetalle(cfg.archivosDetalle)}
+
+      <div class="alerta" style="margin-top:16px;">
+        <div class="alerta-lbl">Preguntas orientadoras — responder antes de tocar el código</div>
+        <ol style="padding-left:20px;margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+          ${cfg.preguntasOrientadoras.map(q => `<li style="font-size:13px;color:var(--muted);line-height:1.65;">${q}</li>`).join('')}
+        </ol>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(242,161,84,.25);">
+          <a href="${cfg.formularioUrl}" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:8px;color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;text-decoration:none;padding:9px 18px;border:1.5px solid rgba(242,161,84,.4);border-radius:7px;background:var(--amber-soft);">
+            Abrir formulario y responder →
+          </a>
+        </div>
+      </div>
+    `
+  };
+
+  const paso1 = {
+    titulo: 'Configurar el proyecto',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">1</div>
+        <div class="step-badge-title">Configurar el <span>proyecto</span></div>
+      </div>
+
+      ${esAct01 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Proyecto base — descargar mini-crud0</div>
+          Descargar el ZIP, descomprimir y abrir la carpeta <code>mini-crud0</code> en VS Code
+          con <em>Archivo → Abrir carpeta…</em> (seleccionar la carpeta, no el ZIP):
+          <br><br>
+          <a href="https://github.com/eliizquierdo/material_programacion_avanzada2026/blob/main/proyectos-teoricos/mini-crud0/mini-crud0.zip"
+             target="_blank" rel="noopener"
+             style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">
+            mini-crud0.zip →
+          </a>
+        </div>
+      ` : ''}
+
+      ${esAct02 ? `
+        <div class="tip">
+          <div class="tip-lbl">Continuar sobre la Actividad 01</div>
+          Abrir la carpeta <strong>minicrud0-mod1</strong> en VS Code —
+          el proyecto que quedó de la Actividad 01 con el atributo <code>sueldo</code> funcionando.
+          No descargar nada nuevo.
+        </div>
+      ` : ''}
+
+      ${esAct03 ? `
+        <div class="aviso">
+          <div class="aviso-lbl">Atención — esta actividad reemplaza un atributo</div>
+          No es solo agregar: hay que <strong>quitar</strong> <code>sueldo</code> (double) y <strong>agregar</strong>
+          <code>categoria</code> (String con opciones fijas). En el formulario, el <code>&lt;input type="number"&gt;</code>
+          se reemplaza por un <code>&lt;select&gt;</code> con tres opciones.
+        </div>
+        <div class="tip">
+          <div class="tip-lbl">Continuar sobre la Actividad 02</div>
+          Abrir la carpeta <strong>minicrud0-mod2</strong> en VS Code —
+          el proyecto que quedó de la Actividad 02 con <code>sueldo</code> y <code>email</code>.
+          No descargar nada nuevo.
+        </div>
+      ` : ''}
+
+      <div class="tip">
+        <div class="tip-lbl">Revisar versión de Tomcat en el pom.xml</div>
+        Antes de desplegar, abrir el archivo <code>pom.xml</code> y verificar que la versión de Tomcat
+        sea <strong>10.1.57</strong>. Si aparece otra versión, corregirla antes de continuar.
+      </div>
+
+      <p style="margin-top:4px;">Desplegar el proyecto <strong>sin modificar nada</strong> para comprobar que funciona de base:</p>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Terminal — dentro de la carpeta del proyecto</span></div>
+        <div class="term-body"><span class="a">mvn</span> clean package
+<span class="a">mvn</span> cargo:run</div>
+      </div>
+      <p>Abrir el navegador y acceder a:</p>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Navegador</span></div>
+        <div class="term-body"><span class="b">${cfg.urlBase}</span></div>
+      </div>
+      <div class="tip">
+        <div class="tip-lbl">Sin base de datos</div>
+        Este proyecto guarda los datos en memoria (<code>ArrayList</code>). Al reiniciar el servidor los datos se pierden —
+        eso es normal. <strong>No hay que ejecutar ningún script SQL</strong>.
+      </div>
+
+    `
+  };
+
+  const paso2 = {
+    titulo: 'Modificar el código',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">2</div>
+        <div class="step-badge-title">Modificar el <span>código</span></div>
+      </div>
+
+
+      <div class="alerta">
+        <div class="alerta-lbl">Antes de modificar — renombrar el proyecto en el pom.xml</div>
+        Abrir el archivo <code>pom.xml</code> y cambiar el valor de <code>&lt;artifactId&gt;</code>
+        (y si existe, también <code>&lt;finalName&gt;</code>) de <code>${cfg.urlBase.split('/').pop()}</code>
+        a <code>${cfg.carpetaProyecto}</code>. Esto hace que la URL del servidor cambie a
+        <code>${cfg.urlPrueba}</code>.
+      </div>
+
+      <p style="margin-top:4px;">Luego realizar los cambios en los siguientes archivos:</p>
+      <div class="file-list">${buildFilas(cfg.archivos)}</div>
+
+      <p style="margin-top:16px;">Una vez guardados los cambios, volver a desplegar y verificar:</p>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Terminal — dentro de la carpeta del proyecto</span></div>
+        <div class="term-body"><span class="a">mvn</span> clean package
+<span class="a">mvn</span> cargo:run</div>
+      </div>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Navegador</span></div>
+        <div class="term-body"><span class="b">${cfg.urlPrueba}</span></div>
+      </div>
+      ${esAct01 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Qué verificar</div>
+          Agregar una persona completando los tres campos (código, nombre, sueldo) y guardar.
+          La tabla de listado debe mostrar el sueldo en una columna nueva. Si no aparece, revisar
+          que el <code>name</code> del input coincide con el <code>getParameter()</code> del Servlet.
+        </div>
+      ` : ''}
+      ${esAct02 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Qué verificar</div>
+          Agregar una persona con los cuatro campos (código, nombre, sueldo, email) y guardar.
+          La tabla de listado debe mostrar el email en una columna nueva. Probar también un email
+          con formato inválido y observar qué hace el navegador.
+        </div>
+      ` : ''}
+      ${esAct03 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Qué verificar</div>
+          El campo Sueldo ya no debe aparecer en el formulario. En su lugar debe verse el desplegable
+          con las tres opciones. Agregar personas con distintas categorías y verificar que cada una
+          aparece correctamente en la tabla. La columna ya no se llama "Sueldo" sino "Categoría".
+        </div>
+      ` : ''}
+    `
+  };
+
+  const paso3 = {
+    titulo: 'Tomar capturas de pantalla',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">3</div>
+        <div class="step-badge-title">Tomar <span>capturas</span></div>
+      </div>
+      <p>Con el proyecto funcionando, tomar las siguientes capturas:</p>
+      <div class="capture-list">${buildCapturas(cfg.capturas)}</div>
+      <div class="tip">
+        <div class="tip-lbl">Consejo</div>
+        Usar <strong>Win + Shift + S</strong> para capturar
+        solo la ventana del navegador. Guardar como .png con nombres descriptivos.
+      </div>
+    `
+  };
+
+  const paso4 = {
+    titulo: 'Comprimir en ZIP',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">4</div>
+        <div class="step-badge-title">Comprimir en <span>ZIP</span></div>
+      </div>
+      <p>Comprimir <strong>solo la carpeta del proyecto</strong>, sin incluir la subcarpeta <code>target/</code> ni las capturas — esas van sueltas aparte.</p>
+      <div class="alerta">
+        <div class="alerta-lbl">Nombre del archivo ZIP</div>
+        El archivo debe llamarse exactamente <code>${cfg.zipEjemplo}</code> — con tu apellido y nombre, sin espacios ni acentos.
+      </div>
+      <div class="tip">
+        <div class="tip-lbl">Cómo excluir la carpeta target</div>
+        Abrir la carpeta del proyecto, seleccionar todo <strong>excepto</strong> la subcarpeta <code>target/</code>,
+        y comprimir la selección. La carpeta <code>target/</code> pesa mucho y no se necesita para la corrección.
+      </div>
+    `
+  };
+
+  const paso5 = {
+    titulo: 'Subir en CREA',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">5</div>
+        <div class="step-badge-title">Subir en <span>CREA</span></div>
+      </div>
+      <p>Ingresar a CREA y adjuntar dos cosas por separado: el ZIP del proyecto y las capturas de pantalla sueltas.</p>
+      <div class="tip" style="margin-bottom:12px;">
+        <div class="tip-lbl">Una sola tarea para las tres actividades</div>
+        Las actividades 01, 02 y 03 se entregan en la misma tarea: <strong>PRACTICA1— MiniCRUD: agregar atributos en MVC</strong>. Subir cada actividad cuando esté terminada.
+      </div>
+      <ul class="substeps">
+        <li>
+          <div class="substep-num">1</div>
+          <div>Acceder a CREA y abrir la tarea <strong>PRACTICA1— MiniCRUD: agregar atributos en MVC</strong>.</div>
+        </li>
+        <li>
+          <div class="substep-num">2</div>
+          <div>Hacer clic en <strong>Agregar entrega</strong> y adjuntar el archivo <code>${cfg.zipEjemplo}</code>.</div>
+        </li>
+        <li>
+          <div class="substep-num">3</div>
+          <div>Adjuntar también las capturas de pantalla <strong>como archivos sueltos</strong> (no dentro del ZIP).</div>
+        </li>
+        <li>
+          <div class="substep-num">4</div>
+          <div>Confirmar que todos los archivos subieron correctamente y hacer clic en <strong>Enviar tarea</strong>.</div>
+        </li>
+      </ul>
+      <div class="tip">
+        <div class="tip-lbl">Verificación final</div>
+        Revisar que el estado de la tarea en CREA cambió a <strong>Enviado para calificación</strong>.
+        Si dice "Borrador", la entrega todavía no fue enviada.
+      </div>
+      <div class="alerta">
+        <div class="alerta-lbl">Nombre correcto del ZIP</div>
+        Revisar que el archivo se llame <code>${cfg.zipEjemplo}</code> con el apellido y nombre propios,
+        sin espacios ni acentos.
+      </div>
+    `
+  };
+
+  return [paso0, paso1, paso2, paso3, paso4, paso5];
+}
+
+function render() {
+  buildTabs();
+  const cfg = CONFIGS[actIdx];
+  const pasos = buildPasos(cfg);
+  buildDots(pasos);
+
+  document.getElementById('card').innerHTML = pasos[pasoIdx].html;
+
+  // Sincronizar el número en el badge del card con la posición real en los puntos de progreso
+  const badgeNum = document.querySelector('.step-badge-num');
+  if (badgeNum && /^\d+$/.test(badgeNum.textContent.trim())) {
+    badgeNum.textContent = pasoIdx + 1;
+  }
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  btnPrev.disabled = pasoIdx === 0;
+  const esUltimoPaso = pasoIdx === pasos.length - 1;
+  const haySiguienteActividad = actIdx < CONFIGS.length - 1;
+  if (esUltimoPaso && haySiguienteActividad) {
+    btnNext.textContent = 'Ir a Actividad ' + (actIdx + 2) + ' →';
+    btnNext.disabled = false;
+  } else if (esUltimoPaso) {
+    btnNext.textContent = '✓ Listo';
+    btnNext.disabled = true;
+  } else {
+    btnNext.textContent = 'Siguiente →';
+    btnNext.disabled = false;
+  }
+}
+
+function cambiarActividad(idx) {
+  actIdx = idx;
+  pasoIdx = 0;
+  render();
+}
+
+function cambiarPaso(dir) {
+  const pasos = buildPasos(CONFIGS[actIdx]);
+  const nuevoIdx = pasoIdx + dir;
+  if (nuevoIdx >= pasos.length && actIdx < CONFIGS.length - 1) {
+    actIdx++;
+    pasoIdx = 0;
+  } else {
+    pasoIdx = Math.max(0, Math.min(pasos.length - 1, nuevoIdx));
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
