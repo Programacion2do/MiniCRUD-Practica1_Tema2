@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guía de entrega — MiniCRUD con edición y eliminación</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#191a23;--panel:#22232f;--panel-2:#262838;--border:#34364a;
+  --text:#e7e7ee;--muted:#9497ab;
+  --amber:#f2a154;--amber-soft:rgba(242,161,84,.12);
+  --green:#7bd88f;--green-soft:rgba(123,216,143,.12);
+  --blue:#7aa2f7;--blue-soft:rgba(122,162,247,.12);
+  --red:#f7768e;--red-soft:rgba(247,118,142,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
+
+.header{padding:36px 40px 20px;max-width:720px;margin:0 auto;width:100%;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+.eyebrow::before{content:'● ';}
+h1{font-family:'JetBrains Mono',monospace;font-size:clamp(18px,3.5vw,26px);font-weight:800;line-height:1.2;margin-bottom:8px;}
+h1 span{color:var(--amber);}
+.subtitle{color:var(--muted);font-size:13.5px;max-width:540px;line-height:1.6;}
+
+/* ── Pestañas de actividad ── */
+.tabs-wrap{max-width:720px;margin:0 auto;padding:0 40px 24px;width:100%;}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.tab-btn{
+  display:flex;align-items:center;gap:8px;
+  background:var(--panel-2);border:1.5px solid var(--border);
+  border-radius:10px;padding:10px 14px;cursor:pointer;
+  font-family:'Inter',sans-serif;text-align:left;
+  transition:all .2s;min-width:0;width:100%;
+}
+.tab-btn:hover{border-color:rgba(242,161,84,.4);}
+.tab-btn.active{border-color:var(--amber);background:var(--amber-soft);}
+.tab-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--muted);background:var(--panel);border:1px solid var(--border);
+  border-radius:6px;padding:2px 7px;flex-shrink:0;transition:all .2s;}
+.tab-btn.active .tab-num{color:var(--amber);border-color:rgba(242,161,84,.4);background:var(--amber-soft);}
+.tab-info{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.tab-title{font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.3;transition:color .2s;}
+.tab-btn.active .tab-title{color:var(--text);}
+.tab-level{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:4px;align-self:flex-start;}
+.tab-level.basico{background:var(--green-soft);color:var(--green);border:1px solid rgba(123,216,143,.3);}
+.tab-level.intermedio{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(122,162,247,.3);}
+.tab-level.avanzado{background:var(--red-soft);color:var(--red);border:1px solid rgba(247,118,142,.3);}
+
+.progress-wrap{max-width:720px;margin:0 auto;padding:0 40px 20px;width:100%;}
+.progress-dots{display:flex;align-items:center;gap:6px;}
+.dot-step{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--muted);transition:all .25s;flex-shrink:0;}
+.dot-step.done{background:var(--amber-soft);border-color:rgba(242,161,84,.5);color:var(--amber);}
+.dot-step.active{background:var(--amber);border-color:var(--amber);color:#191a23;}
+.dot-sep{flex:1;height:2px;background:var(--border);border-radius:2px;min-width:6px;}
+.dot-sep.done{background:rgba(242,161,84,.4);}
+.progress-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;}
+.progress-label span{color:var(--amber);}
+
+.step-area{max-width:720px;margin:0 auto;padding:0 40px;width:100%;flex:1;}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:28px 28px 24px;}
+.card h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;margin-bottom:14px;}
+.card p{font-size:13.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;}
+.card p:last-child{margin-bottom:0;}
+.card p strong{color:var(--text);}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel-2);padding:1px 5px;border-radius:4px;color:var(--amber);}
+
+.step-badge{display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;}
+.step-badge-num{width:44px;height:44px;border-radius:50%;background:var(--amber-soft);border:1.5px solid rgba(242,161,84,.5);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--amber);}
+.step-badge-title{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;}
+.step-badge-title span{color:var(--amber);}
+
+.substeps{list-style:none;padding:0;margin:12px 0;}
+.substeps li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(52,54,74,.4);font-size:13.5px;color:var(--muted);line-height:1.65;}
+.substeps li:last-child{border-bottom:none;}
+.substeps li strong{color:var(--text);}
+.substep-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--amber-soft);border:1px solid rgba(242,161,84,.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--amber);margin-top:2px;}
+
+.file-list{margin:12px 0;display:flex;flex-direction:column;gap:6px;}
+.file-row{display:flex;align-items:baseline;gap:8px;padding:7px 12px;background:var(--panel-2);border-radius:6px;border:1px solid var(--border);}
+.file-badge{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.file-badge.modificar{background:var(--amber-soft);color:var(--amber);border:1px solid rgba(242,161,84,.3);}
+.file-badge.crear{background:rgba(123,216,143,.15);color:var(--green);border:1px solid rgba(123,216,143,.3);}
+.file-badge.sin-cambios{background:var(--panel-2);color:var(--muted);border:1px solid var(--border);}
+.file-path{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);}
+.file-path span{color:var(--text);font-weight:600;}
+
+.term{background:#14151d;border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden;}
+.term-bar{background:var(--panel-2);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;gap:6px;align-items:center;}
+.tdot{width:10px;height:10px;border-radius:50%;background:var(--border);}
+.term-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:6px;}
+.term-body{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;color:var(--green);white-space:pre-wrap;}
+.term-body .c{color:var(--muted);}
+.term-body .a{color:var(--amber);}
+.term-body .b{color:var(--blue);}
+
+.tip{background:var(--green-soft);border:1px solid rgba(123,216,143,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.tip-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--green);letter-spacing:.06em;margin-bottom:5px;}
+.alerta{background:var(--amber-soft);border:1px solid rgba(242,161,84,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.alerta-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--amber);letter-spacing:.06em;margin-bottom:5px;}
+.aviso{background:var(--red-soft);border:1px solid rgba(247,118,142,.3);border-radius:10px;padding:13px 17px;margin:12px 0;font-size:13px;color:var(--text);line-height:1.65;}
+.aviso-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--red);letter-spacing:.06em;margin-bottom:5px;}
+
+.capture-list{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.capture-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--panel-2);border-radius:8px;border:1px solid var(--border);}
+.capture-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
+.capture-text{font-size:13px;color:var(--muted);line-height:1.5;}
+.capture-text strong{color:var(--text);}
+
+.entrega-list{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+.entrega-item{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--panel-2);border-radius:7px;border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+.entrega-icon{color:var(--amber);flex-shrink:0;}
+
+.nav{display:flex;justify-content:space-between;align-items:center;padding:24px 40px 40px;max-width:720px;margin:0 auto;width:100%;}
+.nav-btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:10px 22px;border-radius:8px;cursor:pointer;border:1.5px solid var(--border);background:var(--panel-2);color:var(--text);transition:all .2s;}
+.nav-btn:hover:not(:disabled){border-color:var(--amber);color:var(--amber);}
+.nav-btn:disabled{opacity:.3;cursor:default;}
+.nav-btn.primary{background:var(--amber);color:#191a23;border-color:var(--amber);}
+.nav-btn.primary:hover:not(:disabled){background:#e8924a;}
+
+@media(max-width:520px){
+  .header,.tabs-wrap,.progress-wrap,.step-area,.nav{padding-left:20px;padding-right:20px;}
+  .tabs{flex-direction:column;}
+  .tab-btn{width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Programación Avanzada · UTU</div>
+  <h1>Guía de entrega — <span>MiniCRUD con edición y eliminación</span></h1>
+  <p class="subtitle">Tres actividades para implementar y extender un CRUD completo con JSP, Servlet y el patrón MVC.</p>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-dots" id="dots"></div>
+  <div class="progress-label" id="progress-label"></div>
+</div>
+
+<div class="step-area">
+  <div class="card" id="card"></div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="btn-prev" onclick="cambiarPaso(-1)">← Anterior</button>
+  <button class="nav-btn primary" id="btn-next" onclick="cambiarPaso(1)">Siguiente →</button>
+</div>
+
+<script>
+const TAREA_CREA = 'PRACTICA 2-MiniCrud con edición y eliminación';
+
+const CONFIGS = [
+  /* ── ACTIVIDAD 01 — Básico ── */
+  {
+    actividad: 'Actividad 01 — Ampliar entidad Persona',
+    objetivo: 'El proyecto base (<code>mini-crud1</code>) ya tiene las operaciones de agregar, editar y eliminar funcionando para <strong>código</strong> y <strong>nombre</strong>. La tarea es agregar los atributos <strong>teléfono</strong> y <strong>dirección</strong> y hacer que aparezcan en el formulario de alta, en la tabla de listado y en el formulario de edición.',
+    resumen: 'PersonaVO: cod, nombre → cod, nombre, <strong style="color:var(--amber)">telefono</strong>, <strong style="color:var(--amber)">direccion</strong>',
+    preguntasOrientadoras: [
+      '¿En qué archivo Java se declara la estructura de la entidad Persona? ¿Qué hay que agregar en ese archivo para incorporar dos atributos nuevos: el atributo en sí, el constructor, los getters/setters y el toString()?',
+      '¿Qué diferencia hay entre el formulario de alta y el formulario de edición en cuanto a cómo manejan los datos de una Persona? ¿Por qué hay que modificar los dos?',
+      '¿Cómo llega el valor de un campo de texto desde el formulario hasta el Servlet? ¿Qué método de <code>HttpServletRequest</code> se usa para leerlo?',
+      'En la vista de listado (<code>persona-lista.jsp</code>), ¿qué sintaxis de Expression Language (EL) se usa para mostrar el valor de un atributo? ¿Qué condición tiene que cumplir el nombre del getter en <code>PersonaVO</code> para que EL lo encuentre?',
+      'En el formulario de edición, ¿cómo se precargan los valores actuales en los campos del formulario? ¿Qué expresión EL se escribe en el atributo <code>value</code> del input?',
+      '¿Cuántos archivos JSP hay que modificar en esta actividad? Enumerar cada uno y describir en una línea qué cambia en cada uno.',
+    ],
+    archivosDetalle: [
+      { nombre: 'PersonaVO.java',                capa: 'Modelo · VO',          descripcion: 'Agregar <code>private String telefono</code> y <code>private String direccion</code>. Actualizar constructor, getters/setters y toString().', tipo: 'modificar' },
+      { nombre: 'PersonaControladorServlet.java', capa: 'Controlador',          descripcion: 'En <code>agregar()</code> y en <code>actualizar()</code>: leer <code>getParameter("telefono")</code> y <code>getParameter("direccion")</code> y pasarlos al constructor/setter.', tipo: 'modificar' },
+      { nombre: 'persona-form.jsp',              capa: 'Vista · Formulario alta', descripcion: 'Agregar <code>&lt;label&gt;</code> e <code>&lt;input&gt;</code> para teléfono y dirección.', tipo: 'modificar' },
+      { nombre: 'persona-lista.jsp',             capa: 'Vista · Listado',      descripcion: 'Agregar columnas Teléfono y Dirección en el <code>&lt;thead&gt;</code> y en cada fila de la tabla.', tipo: 'modificar' },
+      { nombre: 'persona-editar.jsp',            capa: 'Vista · Formulario edición', descripcion: 'Agregar los campos con los valores precargados usando EL (<code>value="${persona.telefono}"</code>, etc.).', tipo: 'modificar' },
+    ],
+    nivelCss: 'basico',
+    nivelLabel: 'Básico',
+    tipo: 'act01',
+    carpetaProyecto: 'mini-crud1-extendido',
+    urlBase:   'http://localhost:8080/mini-crud1/persona?accion=listar',
+    urlPrueba: 'http://localhost:8080/mini-crud1-extendido/persona?accion=listar',
+    zipEjemplo: 'Prac2-web-Actividad1_GarciaMaria.zip',
+    archivos: [
+      { tipo: 'modificar', ruta: 'src/main/java/modelo/vo/',       nombre: 'PersonaVO.java' },
+      { tipo: 'modificar', ruta: 'src/main/java/controlador/',     nombre: 'PersonaControladorServlet.java' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-form.jsp' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-lista.jsp' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-editar.jsp' },
+    ],
+    capturas: [
+      { icon: '📋', texto: '<strong>Lista de personas</strong> — tabla con columnas Teléfono y Dirección, con al menos 2 personas cargadas con valores distintos. La URL debe ser visible.' },
+      { icon: '📝', texto: '<strong>Formulario de alta</strong> — formulario con los campos Teléfono y Dirección visibles y con datos escritos (antes de guardar). La URL debe ser visible.' },
+      { icon: '✏️', texto: '<strong>Formulario de edición</strong> — formulario con los valores de teléfono y dirección precargados usando EL. La URL debe ser visible.' },
+    ],
+    archivosEntrega: ['Prac2-web-Actividad1_ApellidoNombre.zip'],
+    verificacion: 'El campo nuevo debe aparecer en el formulario de alta, en la tabla del listado y precargado en el formulario de edición. Si falta en alguno, revisar el archivo correspondiente.',
+    alertaDeploy: 'Los errores más comunes: falta un getter en PersonaVO, el atributo <code>name</code> del input en el JSP no coincide con el parámetro que lee el Servlet, o el constructor de PersonaVO no fue actualizado con los campos nuevos.',
+  },
+
+  /* ── ACTIVIDAD 02 — Intermedio ── */
+  {
+    actividad: 'Actividad 02 — Validar campos',
+    objetivo: 'Sobre el mismo proyecto de la Actividad 01, agregar validación del lado del servidor en el método <code>agregar()</code>: si los datos llegan vacíos, no guardar y volver al formulario con un mensaje de error conservando los datos ya escritos. Si son válidos, guardar y redirigir al listado (patrón PRG).',
+    resumen: 'Sin cambios en PersonaVO — se modifica la <strong style="color:var(--amber)">lógica del Servlet</strong> y el <strong style="color:var(--amber)">formulario JSP</strong>',
+    preguntasOrientadoras: [
+      '¿Qué significa "validación del lado del servidor"? ¿Por qué no alcanza con usar el atributo <code>required</code> en el HTML del formulario?',
+      '¿Cuál es la diferencia entre <code>forward</code> y <code>sendRedirect</code>? ¿Cuándo conviene usar cada uno en este caso?',
+      '¿Qué es el patrón PRG (Post/Redirect/Get)? ¿Qué problema resuelve? ¿Qué pasa si se guarda un dato y luego el usuario presiona F5?',
+      'Si el Servlet hace <code>forward</code> al formulario con un mensaje de error, ¿cómo llega ese mensaje hasta el JSP? ¿Qué métodos se usan en el Servlet para enviarlo y en el JSP para mostrarlo?',
+      '¿Cómo se conservan los valores que el usuario ya escribió cuando el formulario vuelve a mostrarse con un error? ¿Qué hay que agregar en el JSP para lograrlo?',
+      'Describir el flujo completo cuando un usuario envía el formulario con el nombre vacío: qué recibe el Servlet, qué verifica, qué hace si hay error y qué hace si los datos son válidos.',
+    ],
+    archivosDetalle: [
+      { nombre: 'PersonaControladorServlet.java', capa: 'Controlador', descripcion: 'En <code>agregar()</code>: validar que nombre no llegue vacío. Si hay error, setear atributo de error en el request y hacer <code>forward</code> al formulario. Si son válidos, guardar y hacer <code>sendRedirect</code> al listado.', tipo: 'modificar' },
+      { nombre: 'persona-form.jsp',              capa: 'Vista · Formulario', descripcion: 'Mostrar el mensaje de error cuando existe (usando EL o scriptlet). Conservar el valor que el usuario ya escribió en cada campo.', tipo: 'modificar' },
+    ],
+    nivelCss: 'intermedio',
+    nivelLabel: 'Intermedio',
+    tipo: 'act02',
+    carpetaProyecto: 'mini-crud1-extendido',
+    urlBase:   'http://localhost:8080/mini-crud1-extendido/persona?accion=listar',
+    urlPrueba: 'http://localhost:8080/mini-crud1-extendido/persona?accion=mostrarFormAgregar',
+    zipEjemplo: 'Prac2-web-Actividad2_GarciaMaria.zip',
+    archivos: [
+      { tipo: 'modificar', ruta: 'src/main/java/controlador/',     nombre: 'PersonaControladorServlet.java' },
+      { tipo: 'modificar', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'persona-form.jsp' },
+    ],
+    capturas: [
+      { icon: '🚫', texto: '<strong>Error de validación</strong> — el formulario mostrando el mensaje de error, con el campo nombre vacío y los demás campos conservando sus valores. La URL debe ser visible.' },
+      { icon: '✅', texto: '<strong>Guardado exitoso</strong> — el listado de personas después de guardar datos válidos, con la nueva persona visible en la tabla. La URL debe ser visible.' },
+    ],
+    archivosEntrega: ['Prac2-web-Actividad2_ApellidoNombre.zip'],
+    verificacion: 'Probar enviando el formulario con nombre vacío: debe mostrar el error y conservar los demás valores. Luego probar con datos válidos: debe guardar y redirigir al listado.',
+    alertaDeploy: 'Si al enviar con error la página queda en blanco o redirige igual al listado, revisar que se usa <code>forward</code> (no <code>sendRedirect</code>) cuando hay error, y que hay un <code>return</code> después del forward para no continuar ejecutando el método.',
+  },
+
+  /* ── ACTIVIDAD 03 — Avanzado ── */
+  {
+    actividad: 'Actividad 03 — Nuevo CRUD',
+    objetivo: 'Construir un CRUD completo para una entidad a elección: Producto, Libro, Película, Videojuego, Estudiante u otra. Usar <code>mini-crud2</code> como referencia: copiar la estructura de cada archivo, cambiar el nombre de la entidad y adaptar los atributos.',
+    resumen: '6 archivos nuevos — <strong style="color:var(--amber)">XxxVO</strong> · <strong style="color:var(--amber)">XxxDAO</strong> · <strong style="color:var(--amber)">XxxServlet</strong> · <strong style="color:var(--amber)">3 JSP</strong>',
+    preguntasOrientadoras: [
+      '¿Qué archivos componen el patrón MVC en este proyecto? Describir en una oración la responsabilidad de cada capa (Modelo, Vista, Controlador).',
+      '¿Para qué sirve la anotación <code>@WebServlet</code>? ¿Qué pasa si la URL configurada no coincide exactamente con la URL que se intenta acceder en el navegador?',
+      '¿Cómo decide el Servlet qué operación ejecutar (listar, agregar, editar, eliminar)? ¿Qué parámetro se usa y cómo se lee?',
+      '¿Qué ventaja tiene separar la lógica de datos en un DAO en lugar de escribirla directamente en el Servlet?',
+      'En el formulario de edición, ¿por qué el campo del identificador (código o ID) debe ser de solo lectura (<code>readonly</code>)? ¿Qué pasaría si el usuario pudiera cambiarlo?',
+      'Al eliminar un registro, ¿el Servlet debe hacer <code>forward</code> o <code>sendRedirect</code>? ¿Por qué? ¿Qué pasa si el usuario recarga la página después de eliminar?',
+    ],
+    archivosDetalle: [
+      { nombre: 'XxxVO.java',                capa: 'Modelo · VO',      descripcion: 'Definir la entidad elegida: atributos privados, constructor completo, getters/setters y toString().', tipo: 'crear' },
+      { nombre: 'XxxDAO.java',               capa: 'Modelo · DAO',     descripcion: 'ArrayList estático, y los métodos: <code>listar()</code>, <code>agregar()</code>, <code>buscar()</code>, <code>actualizar()</code>, <code>eliminar()</code>.', tipo: 'crear' },
+      { nombre: 'XxxControladorServlet.java', capa: 'Controlador',      descripcion: 'Anotación <code>@WebServlet</code>, leer parámetro <code>accion</code> y delegar en el DAO. Redirigir o hacer forward según el resultado.', tipo: 'crear' },
+      { nombre: 'xxx-form.jsp',              capa: 'Vista · Formulario alta', descripcion: 'Formulario con un campo por atributo, acción POST al Servlet. Mostrar mensaje de error si el código ya existe.', tipo: 'crear' },
+      { nombre: 'xxx-lista.jsp',             capa: 'Vista · Listado',  descripcion: 'Tabla con todos los atributos. Botones Editar y Eliminar en cada fila con los parámetros necesarios.', tipo: 'crear' },
+      { nombre: 'xxx-editar.jsp',            capa: 'Vista · Formulario edición', descripcion: 'Formulario con valores precargados usando EL. El campo código debe ser <code>readonly</code>.', tipo: 'crear' },
+    ],
+    nivelCss: 'avanzado',
+    nivelLabel: 'Avanzado',
+    tipo: 'act03',
+    carpetaProyecto: '[nombre-de-tu-proyecto]',
+    urlBase:   '',
+    urlPrueba: 'http://localhost:8080/[nombre-de-tu-proyecto]/[entidad]?accion=listar',
+    zipEjemplo: 'Prac2-web-Actividad3_GarciaMaria.zip',
+    archivos: [
+      { tipo: 'crear', ruta: 'src/main/java/modelo/vo/',       nombre: 'XxxVO.java' },
+      { tipo: 'crear', ruta: 'src/main/java/modelo/dao/',      nombre: 'XxxDAO.java' },
+      { tipo: 'crear', ruta: 'src/main/java/controlador/',     nombre: 'XxxControladorServlet.java' },
+      { tipo: 'crear', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'xxx-form.jsp' },
+      { tipo: 'crear', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'xxx-lista.jsp' },
+      { tipo: 'crear', ruta: 'src/main/webapp/WEB-INF/vista/', nombre: 'xxx-editar.jsp' },
+    ],
+    capturas: [
+      { icon: '📋', texto: '<strong>Lista de registros</strong> — tabla con al menos 2 registros cargados, mostrando todos los atributos. La URL debe ser visible.' },
+      { icon: '📝', texto: '<strong>Formulario de alta</strong> — con datos escritos, antes de guardar. La URL debe ser visible.' },
+      { icon: '🚫', texto: '<strong>Error código duplicado</strong> — formulario mostrando el error al intentar agregar un código ya existente. La URL debe ser visible.' },
+      { icon: '✏️', texto: '<strong>Formulario de edición</strong> — con valores precargados en todos los campos, campo código readonly. La URL debe ser visible.' },
+    ],
+    archivosEntrega: ['Prac2-web-Actividad3_ApellidoNombre.zip'],
+    verificacion: 'Probar las 4 operaciones: listar, agregar, editar y eliminar. Probar también agregar un código ya existente: debe mostrar error y no guardar.',
+    alertaDeploy: 'Si el navegador muestra 404, verificar que el mapeo <code>@WebServlet</code> coincide exactamente con la URL que se intenta acceder. Si hay error 500, revisar la consola de Tomcat para ver el mensaje de excepción.',
+  },
+];
+
+let actIdx = 0;
+let pasoIdx = 0;
+
+function buildTabs() {
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = CONFIGS.map((cfg, i) => `
+    <button class="tab-btn${i === actIdx ? ' active' : ''}" onclick="cambiarActividad(${i})">
+      <span class="tab-num">0${i+1}</span>
+      <span class="tab-info">
+        <span class="tab-title">${cfg.actividad}</span>
+        <span class="tab-level ${cfg.nivelCss}">${cfg.nivelLabel}</span>
+      </span>
+    </button>
+  `).join('');
+}
+
+function buildDots(pasos) {
+  const wrap = document.getElementById('dots');
+  wrap.innerHTML = pasos.map((p, i) => {
+    const cls = i < pasoIdx ? 'done' : i === pasoIdx ? 'active' : '';
+    const sep = i < pasos.length - 1
+      ? `<div class="dot-sep${i < pasoIdx ? ' done' : ''}"></div>`
+      : '';
+    return `<div class="dot-step ${cls}">${i+1}</div>${sep}`;
+  }).join('');
+
+  document.getElementById('progress-label').innerHTML =
+    `Paso <span>${pasoIdx + 1} de ${pasos.length}</span> — ${pasos[pasoIdx].titulo}`;
+}
+
+function buildFilas(archivos) {
+  return archivos.map(f => `
+    <div class="file-row">
+      <span class="file-badge ${f.tipo}">${f.tipo === 'sin-cambios' ? 'sin cambios' : f.tipo}</span>
+      <span class="file-path">${f.ruta}<span>${f.nombre}</span></span>
+    </div>
+  `).join('');
+}
+
+function buildCapturas(capturas) {
+  return capturas.map(c => `
+    <div class="capture-item">
+      <span class="capture-icon">${c.icon}</span>
+      <span class="capture-text">${c.texto}</span>
+    </div>
+  `).join('');
+}
+
+function buildArchivosDetalle(arr) {
+  return `
+    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;">
+      <thead>
+        <tr style="border-bottom:1.5px solid var(--border);">
+          <th style="text-align:left;padding:6px 8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Archivo</th>
+          <th style="text-align:left;padding:6px 8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Capa</th>
+          <th style="text-align:left;padding:6px 8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;">¿Qué hay que hacer?</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${arr.map(f => `
+          <tr style="border-bottom:1px solid rgba(52,54,74,.4);">
+            <td style="padding:7px 8px;white-space:nowrap;vertical-align:top;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);font-weight:600;">${f.nombre}</span>
+            </td>
+            <td style="padding:7px 8px;white-space:nowrap;vertical-align:top;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);">${f.capa}</span>
+            </td>
+            <td style="padding:7px 8px;vertical-align:top;">
+              <span class="file-badge ${f.tipo}" style="margin-right:6px;vertical-align:middle;">${f.tipo === 'sin-cambios' ? 'sin cambios' : f.tipo}</span><span style="color:var(--muted);line-height:1.5;">${f.descripcion}</span>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function buildEntrega(archivos) {
+  return archivos.map(a => `
+    <div class="entrega-item">
+      <span class="entrega-icon">📎</span>${a}
+    </div>
+  `).join('');
+}
+
+function buildPasos(cfg) {
+  const esAct01 = cfg.tipo === 'act01';
+  const esAct02 = cfg.tipo === 'act02';
+  const esAct03 = cfg.tipo === 'act03';
+
+  const paso0 = {
+    titulo: 'Leer la consigna',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num" style="font-size:18px;">📖</div>
+        <div class="step-badge-title">Leer la <span>consigna</span></div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-lbl">Objetivo</div>
+        <p style="margin-bottom:10px;">${cfg.objetivo}</p>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:var(--panel-2);padding:7px 12px;border-radius:6px;display:inline-block;margin:0;">${cfg.resumen}</p>
+      </div>
+
+      <p style="margin-top:16px;margin-bottom:4px;font-size:13px;">Archivos involucrados:</p>
+      ${buildArchivosDetalle(cfg.archivosDetalle)}
+
+      <div class="alerta" style="margin-top:16px;">
+        <div class="alerta-lbl">Preguntas orientadoras — responder antes de tocar el código</div>
+        <ol style="padding-left:20px;margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+          ${cfg.preguntasOrientadoras.map(q => `<li style="font-size:13px;color:var(--muted);line-height:1.65;">${q}</li>`).join('')}
+        </ol>
+      </div>
+    `
+  };
+
+  const paso1 = {
+    titulo: 'Configurar el proyecto',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">1</div>
+        <div class="step-badge-title">Configurar el <span>proyecto</span></div>
+      </div>
+
+      ${esAct01 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Proyecto base — descargar mini-crud1</div>
+          Descargar el ZIP, descomprimir y abrir la carpeta <code>mini-crud1</code> en VS Code
+          con <em>Archivo → Abrir carpeta…</em> (seleccionar la carpeta, no el ZIP):
+          <br><br>
+          <a href="https://github.com/eliizquierdo/material_programacion_avanzada2026/blob/main/proyectos-teoricos/mini-crud1/mini-crud1.zip"
+             target="_blank" rel="noopener"
+             style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">
+            mini-crud1.zip →
+          </a>
+        </div>
+      ` : ''}
+
+      ${esAct02 ? `
+        <div class="tip">
+          <div class="tip-lbl">Continuar sobre la Actividad 01</div>
+          Abrir la carpeta <strong>mini-crud1-extendido</strong> en VS Code —
+          el proyecto que quedó de la Actividad 01 con los campos teléfono y dirección funcionando.
+          No descargar nada nuevo.
+        </div>
+      ` : ''}
+
+      ${esAct03 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Proyecto de referencia — descargar mini-crud2</div>
+          Descargar mini-crud2 y usarlo como referencia para construir el nuevo CRUD.
+          Cada archivo de Persona (VO, DAO, Servlet, JSPs) sirve de plantilla:
+          copiar su estructura, cambiar el nombre de la entidad y adaptar los atributos.
+          <br><br>
+          <a href="https://github.com/eliizquierdo/material_programacion_avanzada2026/blob/main/proyectos-teoricos/mini-crud2/mini-crud2.zip"
+             target="_blank" rel="noopener"
+             style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">
+            mini-crud2.zip →
+          </a>
+        </div>
+        <div class="tip">
+          <div class="tip-lbl">Crear el proyecto de entrega</div>
+          Copiar la carpeta <code>mini-crud2</code>, renombrarla con el nombre de la entidad elegida
+          y abrir esa copia en VS Code. Cambiar el <code>&lt;artifactId&gt;</code> en el <code>pom.xml</code>
+          al nombre elegido. Los archivos de Persona pueden quedar como referencia interna o eliminarse.
+        </div>
+        <p style="margin-top:14px;font-size:13.5px;color:var(--text);font-weight:600;">Elegir la Clase a implementar:</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
+
+          <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">Producto</div>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;">
+              <li style="font-size:12px;color:var(--muted);">● <code>código</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>nombre</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>precio</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">double</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>descripción</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+            </ul>
+          </div>
+
+          <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">Libro</div>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;">
+              <li style="font-size:12px;color:var(--muted);">● <code>código</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>título</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>autor</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>año</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+            </ul>
+          </div>
+
+          <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">Película</div>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;">
+              <li style="font-size:12px;color:var(--muted);">● <code>código</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>título</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>director</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>año</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+            </ul>
+          </div>
+
+          <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">Videojuego</div>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;">
+              <li style="font-size:12px;color:var(--muted);">● <code>código</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>título</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>género</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>plataforma</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+            </ul>
+          </div>
+
+          <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">Estudiante</div>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;">
+              <li style="font-size:12px;color:var(--muted);">● <code>código</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">int</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>nombre</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>apellido</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+              <li style="font-size:12px;color:var(--muted);">● <code>grupo</code> <span style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;">String</span></li>
+            </ul>
+          </div>
+
+          <div style="background:var(--panel-2);border:1.5px dashed rgba(52,54,74,.8);border-radius:10px;padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">Otra entidad</div>
+            <p style="font-size:11.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;">(proponer al docente)</p>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;">
+              <li style="font-size:12px;color:var(--border);border-bottom:1px dashed var(--border);padding-bottom:4px;">_________________________</li>
+              <li style="font-size:12px;color:var(--border);border-bottom:1px dashed var(--border);padding-bottom:4px;">_________________________</li>
+              <li style="font-size:12px;color:var(--border);border-bottom:1px dashed var(--border);padding-bottom:4px;">_________________________</li>
+            </ul>
+          </div>
+
+        </div>
+      ` : ''}
+
+      <div class="tip">
+        <div class="tip-lbl">Revisar versión de Tomcat en el pom.xml</div>
+        Abrir el archivo <code>pom.xml</code> y verificar que la versión de Tomcat
+        sea <strong>10.1.57</strong>. Si aparece otra versión, corregirla antes de continuar.
+      </div>
+
+      ${!esAct03 ? `
+        <p style="margin-top:4px;">Desplegar el proyecto <strong>sin modificar nada</strong> para comprobar que funciona de base:</p>
+        <div class="term">
+          <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+            <span class="term-lbl">Terminal — dentro de la carpeta del proyecto</span></div>
+          <div class="term-body"><span class="a">mvn</span> clean package
+<span class="a">mvn</span> cargo:run</div>
+        </div>
+        <p>Abrir el navegador y verificar que la aplicación carga correctamente:</p>
+        <div class="term">
+          <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+            <span class="term-lbl">Navegador</span></div>
+          <div class="term-body"><span class="b">${cfg.urlBase}</span></div>
+        </div>
+        <div class="tip">
+          <div class="tip-lbl">Sin base de datos</div>
+          Este proyecto guarda los datos en memoria (<code>ArrayList</code>). Al reiniciar el servidor los datos se pierden —
+          eso es normal. <strong>No hay que ejecutar ningún script SQL</strong>.
+        </div>
+      ` : `
+        <div class="tip">
+          <div class="tip-lbl">Sin base de datos</div>
+          Al igual que mini-crud2, el nuevo proyecto guarda los datos en memoria (<code>ArrayList</code>).
+          Al reiniciar el servidor los datos se pierden — eso es normal.
+          <strong>No hay que ejecutar ningún script SQL</strong>.
+        </div>
+      `}
+    `
+  };
+
+  const paso2 = {
+    titulo: 'Modificar el código',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">2</div>
+        <div class="step-badge-title">${esAct03 ? 'Crear el' : 'Modificar el'} <span>código</span></div>
+      </div>
+
+      ${!esAct02 && !esAct03 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Antes de modificar — renombrar el proyecto en el pom.xml</div>
+          Abrir el archivo <code>pom.xml</code> y cambiar el valor de <code>&lt;artifactId&gt;</code>
+          (y si existe, también <code>&lt;finalName&gt;</code>) de <code>mini-crud1</code>
+          a <code>${cfg.carpetaProyecto}</code>. Esto hace que la URL del servidor cambie a
+          <code>${cfg.urlPrueba}</code>.
+        </div>
+      ` : ''}
+
+      ${esAct03 ? `
+        <div class="alerta">
+          <div class="alerta-lbl">Verificar el artifactId en el pom.xml</div>
+          Confirmar que el <code>&lt;artifactId&gt;</code> en el <code>pom.xml</code> coincide
+          con el nombre del proyecto elegido. Eso determina la URL de acceso.
+        </div>
+      ` : ''}
+
+      <p style="margin-top:4px;">${esAct03 ? 'Crear los siguientes archivos nuevos:' : 'Realizar los cambios en los siguientes archivos:'}</p>
+      <div class="file-list">${buildFilas(cfg.archivos)}</div>
+
+      <p style="margin-top:16px;">Una vez guardados los cambios, desplegar y verificar:</p>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Terminal — dentro de la carpeta del proyecto</span></div>
+        <div class="term-body"><span class="a">mvn</span> clean package
+<span class="a">mvn</span> cargo:run</div>
+      </div>
+      <div class="term">
+        <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+          <span class="term-lbl">Navegador</span></div>
+        <div class="term-body"><span class="b">${cfg.urlPrueba}</span></div>
+      </div>
+
+      <div class="alerta">
+        <div class="alerta-lbl">Qué verificar</div>
+        ${cfg.verificacion}
+      </div>
+
+      <div class="tip">
+        <div class="tip-lbl">Si el deploy falla</div>
+        ${cfg.alertaDeploy}
+      </div>
+    `
+  };
+
+  const paso3 = {
+    titulo: 'Tomar capturas de pantalla',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">3</div>
+        <div class="step-badge-title">Tomar <span>capturas</span></div>
+      </div>
+      <p>Con el proyecto funcionando, tomar las siguientes capturas:</p>
+      <div class="capture-list">${buildCapturas(cfg.capturas)}</div>
+      <div class="tip">
+        <div class="tip-lbl">Consejo</div>
+        Usar <strong>Win + Shift + S</strong> para capturar
+        solo la ventana del navegador. Guardar como .png con nombres descriptivos.
+      </div>
+    `
+  };
+
+  const paso4 = {
+    titulo: 'Comprimir en ZIP',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">4</div>
+        <div class="step-badge-title">Comprimir en <span>ZIP</span></div>
+      </div>
+      <p>Comprimir <strong>solo la carpeta del proyecto</strong>, sin incluir la subcarpeta <code>target/</code> ni las capturas — esas van sueltas aparte.</p>
+      <div class="alerta">
+        <div class="alerta-lbl">Nombre del archivo ZIP</div>
+        El archivo debe llamarse exactamente <code>${cfg.zipEjemplo}</code> — con tu apellido y nombre, sin espacios ni acentos.
+      </div>
+      <div class="tip">
+        <div class="tip-lbl">Cómo excluir la carpeta target</div>
+        Abrir la carpeta del proyecto, seleccionar todo <strong>excepto</strong> la subcarpeta <code>target/</code>,
+        y comprimir la selección. La carpeta <code>target/</code> pesa mucho y no se necesita para la corrección.
+      </div>
+    `
+  };
+
+  const paso5 = {
+    titulo: 'Subir en CREA',
+    html: `
+      <div class="step-badge">
+        <div class="step-badge-num">5</div>
+        <div class="step-badge-title">Subir en <span>CREA</span></div>
+      </div>
+      <p>Ingresar a CREA y adjuntar dos cosas por separado: el ZIP del proyecto y las capturas de pantalla sueltas.</p>
+      <div class="tip" style="margin-bottom:12px;">
+        <div class="tip-lbl">Una sola tarea para las tres actividades</div>
+        Las actividades 01, 02 y 03 se entregan en la misma tarea: <strong>${TAREA_CREA}</strong>. Subir cada actividad cuando esté terminada.
+      </div>
+      <ul class="substeps">
+        <li>
+          <div class="substep-num">1</div>
+          <div>Acceder a CREA y abrir la tarea <strong>${TAREA_CREA}</strong>.</div>
+        </li>
+        <li>
+          <div class="substep-num">2</div>
+          <div>Hacer clic en <strong>Agregar entrega</strong> y adjuntar el archivo <code>${cfg.zipEjemplo}</code>.</div>
+        </li>
+        <li>
+          <div class="substep-num">3</div>
+          <div>Adjuntar también las capturas de pantalla <strong>como archivos sueltos</strong> (no dentro del ZIP).</div>
+        </li>
+        <li>
+          <div class="substep-num">4</div>
+          <div>Confirmar que todos los archivos subieron correctamente y hacer clic en <strong>Enviar tarea</strong>.</div>
+        </li>
+      </ul>
+      <div class="tip">
+        <div class="tip-lbl">Verificación final</div>
+        Revisar que el estado de la tarea en CREA cambió a <strong>Enviado para calificación</strong>.
+        Si dice "Borrador", la entrega todavía no fue enviada.
+      </div>
+      <div class="alerta">
+        <div class="alerta-lbl">Nombre correcto del ZIP</div>
+        Revisar que el archivo se llame <code>${cfg.zipEjemplo}</code> con el apellido y nombre propios,
+        sin espacios ni acentos.
+      </div>
+    `
+  };
+
+  return [paso0, paso1, paso2, paso3, paso4, paso5];
+}
+
+function render() {
+  buildTabs();
+  const cfg = CONFIGS[actIdx];
+  const pasos = buildPasos(cfg);
+  buildDots(pasos);
+
+  document.getElementById('card').innerHTML = pasos[pasoIdx].html;
+
+  // Sincronizar el número en el badge del card con la posición real en los puntos de progreso
+  const badgeNum = document.querySelector('.step-badge-num');
+  if (badgeNum && /^\d+$/.test(badgeNum.textContent.trim())) {
+    badgeNum.textContent = pasoIdx + 1;
+  }
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  btnPrev.disabled = pasoIdx === 0;
+  const esUltimoPaso = pasoIdx === pasos.length - 1;
+  const haySiguienteActividad = actIdx < CONFIGS.length - 1;
+  if (esUltimoPaso && haySiguienteActividad) {
+    btnNext.textContent = 'Ir a Actividad ' + (actIdx + 2) + ' →';
+    btnNext.disabled = false;
+  } else if (esUltimoPaso) {
+    btnNext.textContent = '✓ Listo';
+    btnNext.disabled = true;
+  } else {
+    btnNext.textContent = 'Siguiente →';
+    btnNext.disabled = false;
+  }
+}
+
+function cambiarActividad(idx) {
+  actIdx = idx;
+  pasoIdx = 0;
+  render();
+}
+
+function cambiarPaso(dir) {
+  const pasos = buildPasos(CONFIGS[actIdx]);
+  const nuevoIdx = pasoIdx + dir;
+  if (nuevoIdx >= pasos.length && actIdx < CONFIGS.length - 1) {
+    actIdx++;
+    pasoIdx = 0;
+  } else {
+    pasoIdx = Math.max(0, Math.min(pasos.length - 1, nuevoIdx));
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
